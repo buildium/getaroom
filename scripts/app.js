@@ -293,7 +293,6 @@
 
    var filterResources = function(r) {
        if (!r.resourceName.includes('archive') && (r.resourceName.includes('Room') || r.resourceName.includes('Standup'))) {
-         console.log(r);
            return r;
        }
    }
