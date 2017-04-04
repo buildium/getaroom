@@ -24,7 +24,18 @@
     cardTemplate: document.querySelector('.cardTemplate'),
     container: document.querySelector('.main'),
     addDialog: document.querySelector('.dialog-container'),
-    daysOfWeek: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']
+    authorizeButton: document.getElementById('authorize-button'),
+    signoutButton: document.getElementById('signout-button'),
+    googleApi: document.getElementById('google-api'),
+    daysOfWeek: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'],
+    // Client ID and API key from the Developer Console.
+    clientId: config.CLIENT_ID,
+    // Array of API discovery doc URLs for APIs used by the quickstart.
+    discoveryDocs: ["https://www.googleapis.com/discovery/v1/apis/calendar/v3/rest", 
+                    "https://www.googleapis.com/discovery/v1/apis/admin/directory_v1/rest"],
+    // Authorization scopes required by the API; multiple scopes can be
+    // included, separated by spaces.
+    scopes: "https://www.googleapis.com/auth/calendar https://www.googleapis.com/auth/admin.directory.resource.calendar"
   };
 
 
@@ -33,6 +44,25 @@
    * Event listeners for UI elements
    *
    ****************************************************************************/
+
+  app.googleApi.addEventListener('load', function() {
+      app.googleApi.onload=function(){};
+      app.handleClientLoad();
+  });
+  
+  app.googleApi.addEventListener('readystatechange', function() {
+      if (app.googleApi.readyState === 'complete') {
+          app.googleApi.onload();
+      }
+  });
+   
+  app.authorizeButton.addEventListener('click', function(event) {
+      app.handleAuthClick(event);
+  });
+  
+  app.signoutButton.addEventListener('click', function(event) {
+      app.handleSignoutClick(event);
+  });
 
   document.getElementById('butRefresh').addEventListener('click', function() {
     // Refresh all of the forecasts
@@ -115,68 +145,28 @@
     }
   };
 
-  // Updates a weather card with the latest weather forecast. If the card
-  // doesn't already exist, it's cloned from the template.
-  app.updateForecastCard = function(data) {
-    var dataLastUpdated = new Date(data.created);
-    var sunrise = data.channel.astronomy.sunrise;
-    var sunset = data.channel.astronomy.sunset;
-    var current = data.channel.item.condition;
-    var humidity = data.channel.atmosphere.humidity;
-    var wind = data.channel.wind;
+  app.updateResourceCard = function(resource) {
+    var resourceId = resource.resourceId;
+    var resourceEmail = resource.resourceEmail;
+    var resourceName = resource.resourceName;
+    var resourceDescription = resource.resourceDescription;
+    var resourceType = resource.resourceType;
 
-    var card = app.visibleCards[data.key];
+    var card = app.visibleCards[resourceId];
     if (!card) {
       card = app.cardTemplate.cloneNode(true);
       card.classList.remove('cardTemplate');
-      card.querySelector('.location').textContent = data.label;
       card.removeAttribute('hidden');
       app.container.appendChild(card);
-      app.visibleCards[data.key] = card;
+      app.visibleCards[resourceId] = card;
     }
 
-    // Verifies the data provide is newer than what's already visible
-    // on the card, if it's not bail, if it is, continue and update the
-    // time saved in the card
-    var cardLastUpdatedElem = card.querySelector('.card-last-updated');
-    var cardLastUpdated = cardLastUpdatedElem.textContent;
-    if (cardLastUpdated) {
-      cardLastUpdated = new Date(cardLastUpdated);
-      // Bail if the card has more recent data then the data
-      if (dataLastUpdated.getTime() < cardLastUpdated.getTime()) {
-        return;
-      }
-    }
-    cardLastUpdatedElem.textContent = data.created;
-
-    card.querySelector('.description').textContent = current.text;
-    card.querySelector('.date').textContent = current.date;
-    card.querySelector('.current .icon').classList.add(app.getIconClass(current.code));
-    card.querySelector('.current .temperature .value').textContent =
-      Math.round(current.temp);
-    card.querySelector('.current .sunrise').textContent = sunrise;
-    card.querySelector('.current .sunset').textContent = sunset;
-    card.querySelector('.current .humidity').textContent =
-      Math.round(humidity) + '%';
-    card.querySelector('.current .wind .value').textContent =
-      Math.round(wind.speed);
-    card.querySelector('.current .wind .direction').textContent = wind.direction;
-    var nextDays = card.querySelectorAll('.future .oneday');
-    var today = new Date();
-    today = today.getDay();
-    for (var i = 0; i < 7; i++) {
-      var nextDay = nextDays[i];
-      var daily = data.channel.item.forecast[i];
-      if (daily && nextDay) {
-        nextDay.querySelector('.date').textContent =
-          app.daysOfWeek[(i + today) % 7];
-        nextDay.querySelector('.icon').classList.add(app.getIconClass(daily.code));
-        nextDay.querySelector('.temp-high .value').textContent =
-          Math.round(daily.high);
-        nextDay.querySelector('.temp-low .value').textContent =
-          Math.round(daily.low);
-      }
-    }
+    card.querySelector('.location').textContent = resourceName;
+    card.querySelector('.type').textContent = resourceType;
+    card.querySelector('.description').textContent = resourceDescription;
+    card.querySelector(".reserve-room-button").addEventListener('click', function() {
+      app.bookRoom(resourceEmail);
+    });
     if (app.isLoading) {
       app.spinner.setAttribute('hidden', true);
       app.container.removeAttribute('hidden');
@@ -184,186 +174,121 @@
     }
   };
 
-
   /*****************************************************************************
    *
    * Methods for dealing with the model
    *
    ****************************************************************************/
 
-  /*
-   * Gets a forecast for a specific city and updates the card with the data.
-   * getForecast() first checks if the weather data is in the cache. If so,
-   * then it gets that data and populates the card with the cached data.
-   * Then, getForecast() goes to the network for fresh data. If the network
-   * request goes through, then the card gets updated a second time with the
-   * freshest data.
+   /**
+   * Print the summary and start datetime/date of the next ten events in
+   * the authorized user's calendar. If no events are found an
+   * appropriate message is printed.
    */
-  app.getForecast = function(key, label) {
-    var statement = 'select * from weather.forecast where woeid=' + key;
-    var url = 'https://query.yahooapis.com/v1/public/yql?format=json&q=' +
-        statement;
-    // TODO add cache logic here
-    if ('caches' in window) {
-      /*
-       * Check if the service worker has already cached this city's weather
-       * data. If the service worker has the data, then display the cached
-       * data while the app fetches the latest data.
-       */
-      caches.match(url).then(function(response) {
-        if (response) {
-          response.json().then(function updateFromCache(json) {
-            var results = json.query.results;
-            results.key = key;
-            results.label = label;
-            results.created = json.query.created;
-            app.updateForecastCard(results);
-          });
-        }
-      });
-    }
-    // Fetch the latest data.
-    var request = new XMLHttpRequest();
-    request.onreadystatechange = function() {
-      if (request.readyState === XMLHttpRequest.DONE) {
-        if (request.status === 200) {
-          var response = JSON.parse(request.response);
-          var results = response.query.results;
-          results.key = key;
-          results.label = label;
-          results.created = response.query.created;
-          app.updateForecastCard(results);
-        }
-      } else {
-        // Return the initial weather forecast since no data is available.
-        app.updateForecastCard(initialWeatherForecast);
-      }
-    };
-    request.open('GET', url);
-    request.send();
-  };
+   app.listUpcomingEvents = function() {
+       gapi.client.calendar.events.list({
+         'calendarId': 'primary',
+         'timeMin': (new Date()).toISOString(),
+         'showDeleted': false,
+         'singleEvents': true,
+         'maxResults': 10,
+         'orderBy': 'startTime'
+       }).then(function(response) {
+         var events = response.result.items;
+         console.log('Upcoming events:');
 
-  // Iterate all of the cards and attempt to get the latest forecast data
-  app.updateForecasts = function() {
-    var keys = Object.keys(app.visibleCards);
-    keys.forEach(function(key) {
-      app.getForecast(key);
-    });
-  };
+         if (events.length > 0) {
+           for (var i = 0; i < events.length; i++) {
+             var event = events[i];
+             var when = event.start.dateTime;
+             if (!when) {
+               when = event.start.date;
+             }
+             console.log(event.summary + ' (' + when + ')')
+           }
+         } else {
+           console.log('No upcoming events found.');
+         }
+       })
+   };
 
-  // TODO add saveSelectedCities function here
-  // Save list of cities to localStorage.
-  app.saveSelectedCities = function() {
-    var selectedCities = JSON.stringify(app.selectedCities);
-    localStorage.selectedCities = selectedCities;
-  };
+   app.groupBy = function(xs, key) {
+     return xs.reduce(function(rv, x) {
+       (rv[x[key]] = rv[x[key]] || []).push(x);
+       return rv;
+     }, {});
+   };
 
-  app.getIconClass = function(weatherCode) {
-    // Weather codes: https://developer.yahoo.com/weather/documentation.html#codes
-    weatherCode = parseInt(weatherCode);
-    switch (weatherCode) {
-      case 25: // cold
-      case 32: // sunny
-      case 33: // fair (night)
-      case 34: // fair (day)
-      case 36: // hot
-      case 3200: // not available
-        return 'clear-day';
-      case 0: // tornado
-      case 1: // tropical storm
-      case 2: // hurricane
-      case 6: // mixed rain and sleet
-      case 8: // freezing drizzle
-      case 9: // drizzle
-      case 10: // freezing rain
-      case 11: // showers
-      case 12: // showers
-      case 17: // hail
-      case 35: // mixed rain and hail
-      case 40: // scattered showers
-        return 'rain';
-      case 3: // severe thunderstorms
-      case 4: // thunderstorms
-      case 37: // isolated thunderstorms
-      case 38: // scattered thunderstorms
-      case 39: // scattered thunderstorms (not a typo)
-      case 45: // thundershowers
-      case 47: // isolated thundershowers
-        return 'thunderstorms';
-      case 5: // mixed rain and snow
-      case 7: // mixed snow and sleet
-      case 13: // snow flurries
-      case 14: // light snow showers
-      case 16: // snow
-      case 18: // sleet
-      case 41: // heavy snow
-      case 42: // scattered snow showers
-      case 43: // heavy snow
-      case 46: // snow showers
-        return 'snow';
-      case 15: // blowing snow
-      case 19: // dust
-      case 20: // foggy
-      case 21: // haze
-      case 22: // smoky
-        return 'fog';
-      case 24: // windy
-      case 23: // blustery
-        return 'windy';
-      case 26: // cloudy
-      case 27: // mostly cloudy (night)
-      case 28: // mostly cloudy (day)
-      case 31: // clear (night)
-        return 'cloudy';
-      case 29: // partly cloudy (night)
-      case 30: // partly cloudy (day)
-      case 44: // partly cloudy
-        return 'partly-cloudy-day';
-    }
-  };
+   app.getResourceIds = function(resources) {
+     var items = [];
+     for (var r in resources) {
+       if (resources[r].resourceEmail) {
+         var resource = { 'id' : resources[r].resourceEmail };
+         items.push(resource)
+       }
+     }
 
-  /*
-   * Fake weather data that is presented when the user first uses the app,
-   * or when the user has not saved any cities. See startup code for more
-   * discussion.
-   */
-  var initialWeatherForecast = {
-    key: '2459115',
-    label: 'New York, NY',
-    created: '2016-07-22T01:00:00Z',
-    channel: {
-      astronomy: {
-        sunrise: "5:43 am",
-        sunset: "8:21 pm"
-      },
-      item: {
-        condition: {
-          text: "Windy",
-          date: "Thu, 21 Jul 2016 09:00 PM EDT",
-          temp: 56,
-          code: 24
-        },
-        forecast: [
-          {code: 44, high: 86, low: 70},
-          {code: 44, high: 94, low: 73},
-          {code: 4, high: 95, low: 78},
-          {code: 24, high: 75, low: 89},
-          {code: 24, high: 89, low: 77},
-          {code: 44, high: 92, low: 79},
-          {code: 44, high: 89, low: 77}
-        ]
-      },
-      atmosphere: {
-        humidity: 56
-      },
-      wind: {
-        speed: 25,
-        direction: 195
-      }
-    }
-  };
-  // TODO uncomment line below to test app with fake data
-  // app.updateForecastCard(initialWeatherForecast);
+     return items;
+   }
+
+   app.availableResources = function(resources, timeMin, timeMax) {
+       var resourceIds = app.getResourceIds(resources);
+       
+       resources.forEach(function(r) {
+           app.updateResourceCard(r);
+       });
+       gapi.client.calendar.freebusy.query({
+         'items': resourceIds,
+         'timeMin': timeMin,
+         'timeMax': timeMax
+       }).then(function(response) {
+         var calendars = response.result.calendars;
+         console.log('Available rooms from:' + timeMin + ' to ' + timeMax);
+
+         if (calendars) {
+           for (var r in calendars) {
+             var resource = calendars[r];
+             var busy = resource.busy;
+             var errors = resource.errors;
+             if (!errors && busy && busy.length === 0) {
+               console.log(r);
+             }
+           }
+         } else {
+           console.log('No upcoming events found.');
+         }
+       })
+   };
+
+   app.getResources = function() {
+       gapi.client.directory.resources.calendars.list({
+         'customer': 'my_customer',
+         'maxResults': 50
+       }).then(function(response) {
+         var resources = response.result.items;
+         console.log('Resources:');
+
+
+         var justResources = [];
+         if (resources.length > 0) {
+           var groupedResources = app.groupBy(resources, 'resourceType');
+           for(var resourceKey in groupedResources) {
+             console.log(resourceKey + ':');
+             for(var resourceIndex in groupedResources[resourceKey]) {
+               var resource = groupedResources[resourceKey][resourceIndex]
+               console.log(resource.resourceName + ' - ' + resource.resourceEmail);
+               justResources.push(resource);
+             }
+           }
+         } else {
+           console.log('No resources found.');
+         }
+
+         var now = new Date();
+         var halfHourFromNow = new Date(now.getTime() + 30*60000);
+         app.availableResources(justResources, now, halfHourFromNow.toISOString());
+       });
+   }
 
   /************************************************************************
    *
@@ -376,103 +301,74 @@
    *   SimpleDB (https://gist.github.com/inexorabletash/c8069c042b734519680c)
    ************************************************************************/
 
-  // TODO add startup code here
-  app.selectedCities = localStorage.selectedCities;
-  if (app.selectedCities) {
-    app.selectedCities = JSON.parse(app.selectedCities);
-    app.selectedCities.forEach(function(city) {
-      app.getForecast(city.key, city.label);
-    });
-  } else {
-    /* The user is using the app for the first time, or the user has not
-     * saved any cities, so show the user some fake data. A real app in this
-     * scenario could guess the user's location via IP lookup and then inject
-     * that data into the page.
-     */
-    app.updateForecastCard(initialWeatherForecast);
-    app.selectedCities = [
-      {key: initialWeatherForecast.key, label: initialWeatherForecast.label}
-    ];
-    app.saveSelectedCities();
-  }
+   /**
+   *  On load, called to load the auth2 library and API client library.
+   */
+   app.handleClientLoad = function() {
+       gapi.load('client:auth2', app.initClient);
+   }
 
-  // TODO add service worker code here
+   /**
+   *  Initializes the API client library and sets up sign-in state
+   *  listeners.
+   */
+   app.initClient = function() {
+       gapi.client.init({
+         discoveryDocs: app.discoveryDocs,
+         clientId: app.clientId,
+         scope: app.scopes
+       }).then(function () {
+         // Listen for sign-in state changes.
+         gapi.auth2.getAuthInstance().isSignedIn.listen(app.updateSigninStatus);
+
+         // Handle the initial sign-in state.
+         app.updateSigninStatus(gapi.auth2.getAuthInstance().isSignedIn.get());
+         app.authorizeButton.onclick = app.handleAuthClick;
+         app.signoutButton.onclick = app.handleSignoutClick;
+       });
+   }
+
+   /**
+   *  Called when the signed in status changes, to update the UI
+   *  appropriately. After a sign-in, the API is called.
+   */
+   app.updateSigninStatus = function(isSignedIn) {
+       if (isSignedIn) {
+         app.authorizeButton.style.display = 'none';
+         app.signoutButton.style.display = 'block';
+         app.listUpcomingEvents();
+         app.getResources();
+       } else {
+         app.authorizeButton.style.display = 'block';
+         app.signoutButton.style.display = 'none';
+       }
+   }
+
+   /**
+   *  Sign in the user upon button click.
+   */
+   app.handleAuthClick = function(event) {
+       gapi.auth2.getAuthInstance().signIn();
+   }
+
+   /**
+   *  Sign out the user upon button click.
+   */
+   app.handleSignoutClick = function(event) {
+       gapi.auth2.getAuthInstance().signOut();
+   }
+  
+   /************************************************************************
+    *
+    * Install Service Worker
+    ************************************************************************/
+    
   if ('serviceWorker' in navigator) {
     navigator.serviceWorker
              .register('./service-worker.js')
              .then(function() { console.log('Service Worker Registered'); });
   }
 })();
-
-// Client ID and API key from the Developer Console
-var CLIENT_ID = config.CLIENT_ID;
-
-// Array of API discovery doc URLs for APIs used by the quickstart
-var DISCOVERY_DOCS = ["https://www.googleapis.com/discovery/v1/apis/calendar/v3/rest", "https://www.googleapis.com/discovery/v1/apis/admin/directory_v1/rest"];
-
-// Authorization scopes required by the API; multiple scopes can be
-// included, separated by spaces.
-var SCOPES = "https://www.googleapis.com/auth/calendar https://www.googleapis.com/auth/admin.directory.resource.calendar";
-
-var authorizeButton = document.getElementById('authorize-button');
-var signoutButton = document.getElementById('signout-button');
-
-/**
-*  On load, called to load the auth2 library and API client library.
-*/
-function handleClientLoad() {
-    gapi.load('client:auth2', initClient);
-}
-
-/**
-*  Initializes the API client library and sets up sign-in state
-*  listeners.
-*/
-function initClient() {
-gapi.client.init({
-  discoveryDocs: DISCOVERY_DOCS,
-  clientId: CLIENT_ID,
-  scope: SCOPES
-}).then(function () {
-  // Listen for sign-in state changes.
-  gapi.auth2.getAuthInstance().isSignedIn.listen(updateSigninStatus);
-
-  // Handle the initial sign-in state.
-  updateSigninStatus(gapi.auth2.getAuthInstance().isSignedIn.get());
-  authorizeButton.onclick = handleAuthClick;
-  signoutButton.onclick = handleSignoutClick;
-});
-}
-
-/**
-*  Called when the signed in status changes, to update the UI
-*  appropriately. After a sign-in, the API is called.
-*/
-function updateSigninStatus(isSignedIn) {
-if (isSignedIn) {
-  authorizeButton.style.display = 'none';
-  signoutButton.style.display = 'block';
-  listUpcomingEvents();
-  var resources = getResources();
-} else {
-  authorizeButton.style.display = 'block';
-  signoutButton.style.display = 'none';
-}
-}
-
-/**
-*  Sign in the user upon button click.
-*/
-function handleAuthClick(event) {
-gapi.auth2.getAuthInstance().signIn();
-}
-
-/**
-*  Sign out the user upon button click.
-*/
-function handleSignoutClick(event) {
-gapi.auth2.getAuthInstance().signOut();
-}
 
 /**
 * Append a pre element to the body containing the given message
@@ -485,120 +381,3 @@ function appendPre(message) {
     var textContent = document.createTextNode(message + '\n');
     pre.appendChild(textContent);
 }
-
-var script = document.getElementById('google-api');
-script.onload = function() {
-    script.onload=function(){};
-    handleClientLoad();
-}
-script.onreadystatechange = function() {
-    if (script.readyState === 'complete') {
-        script.onload();
-    }
-}
-
-/**
-* Print the summary and start datetime/date of the next ten events in
-* the authorized user's calendar. If no events are found an
-* appropriate message is printed.
-*/
-function listUpcomingEvents() {
-gapi.client.calendar.events.list({
-  'calendarId': 'primary',
-  'timeMin': (new Date()).toISOString(),
-  'showDeleted': false,
-  'singleEvents': true,
-  'maxResults': 10,
-  'orderBy': 'startTime'
-}).then(function(response) {
-  var events = response.result.items;
-  appendPre('Upcoming events:');
-
-  if (events.length > 0) {
-    for (i = 0; i < events.length; i++) {
-      var event = events[i];
-      var when = event.start.dateTime;
-      if (!when) {
-        when = event.start.date;
-      }
-      appendPre(event.summary + ' (' + when + ')')
-    }
-  } else {
-    appendPre('No upcoming events found.');
-  }
-})
-};
-
-var groupBy = function(xs, key) {
-  return xs.reduce(function(rv, x) {
-    (rv[x[key]] = rv[x[key]] || []).push(x);
-    return rv;
-  }, {});
-};
-
-var getResourceIds = function(resources) {
-  var items = [];
-  for (r in resources) {
-    if (resources[r].resourceEmail) {
-      var resource = { 'id' : resources[r].resourceEmail };
-      items.push(resource)
-    }
-  }
-
-  return items;
-}
-
-function availableResources(resources, timeMin, timeMax) {
-  var resourceIds = getResourceIds(resources);
-gapi.client.calendar.freebusy.query({
-  'items': resourceIds,
-  'timeMin': timeMin,
-  'timeMax': timeMax
-}).then(function(response) {
-  var calendars = response.result.calendars;
-  appendPre('Available rooms from:' + timeMin + ' to ' + timeMax);
-
-  if (calendars) {
-    for (r in calendars) {
-      var resource = calendars[r];
-      var busy = resource.busy;
-      var errors = resource.errors;
-      if (!errors && busy && busy.length === 0) {
-        appendPre(r)
-      }
-    }
-  } else {
-    appendPre('No upcoming events found.');
-  }
-})
-};
-
-var getResources = function() {
-gapi.client.directory.resources.calendars.list({
-  'customer': 'my_customer',
-  'maxResults': 50
-}).then(function(response) {
-  var resources = response.result.items;
-  appendPre('Resources:');
-
-
-  var justResources = [];
-  if (resources.length > 0) {
-    var groupedResources = groupBy(resources, 'resourceType');
-    for(resourceKey in groupedResources) {
-      appendPre(resourceKey + ':');
-      for(resourceIndex in groupedResources[resourceKey]) {
-        var resource = groupedResources[resourceKey][resourceIndex]
-        appendPre(resource.resourceName + ' - ' + resource.resourceEmail);
-        justResources.push(resource);
-      }
-    }
-  } else {
-    appendPre('No resources found.');
-  }
-
-  var now = new Date();
-  var halfHourFromNow = new Date(now.getTime() + 30*60000);
-  availableResources(justResources, now, halfHourFromNow.toISOString());
-});
-};
