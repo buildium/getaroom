@@ -31,7 +31,7 @@
     // Client ID and API key from the Developer Console.
     clientId: config.CLIENT_ID,
     // Array of API discovery doc URLs for APIs used by the quickstart.
-    discoveryDocs: ["https://www.googleapis.com/discovery/v1/apis/calendar/v3/rest", 
+    discoveryDocs: ["https://www.googleapis.com/discovery/v1/apis/calendar/v3/rest",
                     "https://www.googleapis.com/discovery/v1/apis/admin/directory_v1/rest"],
     // Authorization scopes required by the API; multiple scopes can be
     // included, separated by spaces.
@@ -49,17 +49,17 @@
       app.googleApi.onload=function(){};
       app.handleClientLoad();
   });
-  
+
   app.googleApi.addEventListener('readystatechange', function() {
       if (app.googleApi.readyState === 'complete') {
           app.googleApi.onload();
       }
   });
-   
+
   app.authorizeButton.addEventListener('click', function(event) {
       app.handleAuthClick(event);
   });
-  
+
   app.signoutButton.addEventListener('click', function(event) {
       app.handleSignoutClick(event);
   });
@@ -68,37 +68,6 @@
     // Refresh all of the forecasts
     app.updateForecasts();
   });
-
-  document.getElementById('butAdd').addEventListener('click', function() {
-    // Open/show the add new city dialog
-    app.toggleAddDialog(true);
-  });
-
-  document.getElementById('butAddCity').addEventListener('click', function() {
-    // Add the newly selected city
-    var select = document.getElementById('selectCityToAdd');
-    var selected = select.options[select.selectedIndex];
-    var key = selected.value;
-    var label = selected.textContent;
-    if (!app.selectedCities) {
-      app.selectedCities = [];
-    }
-    app.getForecast(key, label);
-    app.selectedCities.push({key: key, label: label});
-    app.saveSelectedCities();
-    app.toggleAddDialog(false);
-  });
-
-  document.getElementById('butAddCancel').addEventListener('click', function() {
-    // Close the add new city dialog
-    app.toggleAddDialog(false);
-  });
-
-  //this is really bad code
-  document.getElementById('book-room-button').addEventListener('click', function() {
-      var resource = document.getElementById('resourceId').value;
-      app.bookRoom(resource);
-  })
 
 
   /*****************************************************************************
@@ -135,15 +104,6 @@
            appendPre('Event created: ' + response.htmlLink);
        });
    };
-
-  // Toggles the visibility of the add new city dialog.
-  app.toggleAddDialog = function(visible) {
-    if (visible) {
-      app.addDialog.classList.add('dialog-container--visible');
-    } else {
-      app.addDialog.classList.remove('dialog-container--visible');
-    }
-  };
 
   app.updateResourceCard = function(resource) {
     var resourceId = resource.resourceId;
@@ -233,7 +193,7 @@
 
    app.availableResources = function(resources, timeMin, timeMax) {
        var resourceIds = app.getResourceIds(resources);
-       
+
        resources.forEach(function(r) {
            app.updateResourceCard(r);
        });
@@ -357,12 +317,12 @@
    app.handleSignoutClick = function(event) {
        gapi.auth2.getAuthInstance().signOut();
    }
-  
+
    /************************************************************************
     *
     * Install Service Worker
     ************************************************************************/
-    
+
   if ('serviceWorker' in navigator) {
     navigator.serviceWorker
              .register('./service-worker.js')
