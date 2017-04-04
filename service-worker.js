@@ -18,6 +18,7 @@ var filesToCache = [
   '/',
   '/index.html',
   '/config.js',
+  '/scripts/model.js',
   '/scripts/app.js',
   '/styles/inline.css',
   '/images/ic_add_white_24px.svg',

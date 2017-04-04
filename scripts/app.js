@@ -28,12 +28,10 @@
     signoutButton: document.getElementById('signout-button'),
     googleApi: document.getElementById('google-api'),
     daysOfWeek: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'],
-    // Client ID and API key from the Developer Console.
     clientId: config.CLIENT_ID,
-    // Array of API discovery doc URLs for APIs used by the quickstart.
+    useServiceWorker: config.USE_SERVICE_WORKER,
     discoveryDocs: ["https://www.googleapis.com/discovery/v1/apis/calendar/v3/rest",
                     "https://www.googleapis.com/discovery/v1/apis/admin/directory_v1/rest"],
-    // Authorization scopes required by the API; multiple scopes can be
     // included, separated by spaces.
     scopes: "https://www.googleapis.com/auth/calendar https://www.googleapis.com/auth/admin.directory.resource.calendar"
   };
@@ -56,17 +54,9 @@
       }
   });
 
-  app.authorizeButton.addEventListener('click', function(event) {
-      app.handleAuthClick(event);
-  });
-
-  app.signoutButton.addEventListener('click', function(event) {
-      app.handleSignoutClick(event);
-  });
-
   document.getElementById('butRefresh').addEventListener('click', function() {
     // Refresh all of the forecasts
-    app.updateForecasts();
+    app.refreshResources();
   });
 
 
@@ -104,6 +94,12 @@
            appendPre('Event created: ' + response.htmlLink);
        });
    };
+   
+   app.updateResourceCards = function(resources) {
+       resources.forEach(function(resource) {
+           app.updateResourceCard(resource);
+       });
+   }
 
   app.updateResourceCard = function(resource) {
     var resourceId = resource.resourceId;
@@ -140,121 +136,10 @@
    *
    ****************************************************************************/
 
-   /**
-   * Print the summary and start datetime/date of the next ten events in
-   * the authorized user's calendar. If no events are found an
-   * appropriate message is printed.
-   */
-   app.listUpcomingEvents = function() {
-       gapi.client.calendar.events.list({
-         'calendarId': 'primary',
-         'timeMin': (new Date()).toISOString(),
-         'showDeleted': false,
-         'singleEvents': true,
-         'maxResults': 10,
-         'orderBy': 'startTime'
-       }).then(function(response) {
-         var events = response.result.items;
-         console.log('Upcoming events:');
-
-         if (events.length > 0) {
-           for (var i = 0; i < events.length; i++) {
-             var event = events[i];
-             var when = event.start.dateTime;
-             if (!when) {
-               when = event.start.date;
-             }
-             console.log(event.summary + ' (' + when + ')')
-           }
-         } else {
-           console.log('No upcoming events found.');
-         }
-       })
-   };
-
-   app.groupBy = function(xs, key) {
-     return xs.reduce(function(rv, x) {
-       (rv[x[key]] = rv[x[key]] || []).push(x);
-       return rv;
-     }, {});
-   };
-
-   app.getResourceIds = function(resources) {
-     var items = [];
-     for (var r in resources) {
-       if (resources[r].resourceEmail) {
-         var resource = { 'id' : resources[r].resourceEmail };
-         items.push(resource)
-       }
-     }
-
-     return items;
-   }
-
-   app.availableResources = function(resources, timeMin, timeMax) {
-       var resourceIds = app.getResourceIds(resources);
-
-       resources.forEach(function(r) {
-           app.updateResourceCard(r);
-       });
-       gapi.client.calendar.freebusy.query({
-         'items': resourceIds,
-         'timeMin': timeMin,
-         'timeMax': timeMax
-       }).then(function(response) {
-         var calendars = response.result.calendars;
-         console.log('Available rooms from:' + timeMin + ' to ' + timeMax);
-
-         if (calendars) {
-           for (var r in calendars) {
-             var resource = calendars[r];
-             var busy = resource.busy;
-             var errors = resource.errors;
-             if (!errors && busy && busy.length === 0) {
-               console.log(r);
-             }
-           }
-         } else {
-           console.log('No upcoming events found.');
-         }
-       })
-   };
-
-   app.getResources = function() {
-       gapi.client.directory.resources.calendars.list({
-         'customer': 'my_customer',
-         'maxResults': 50
-       }).then(function(response) {
-         var resources = response.result.items;
-         var filteredResources = resources.filter(filterResources);
-         console.log('Resources:');
-
-
-         var justResources = [];
-         if (resources.length > 0) {
-           var groupedResources = app.groupBy(filteredResources, 'resourceType');
-           for(var resourceKey in groupedResources) {
-             console.log(resourceKey + ':');
-             for(var resourceIndex in groupedResources[resourceKey]) {
-               var resource = groupedResources[resourceKey][resourceIndex]
-               console.log(resource.resourceName + ' - ' + resource.resourceEmail);
-               justResources.push(resource);
-             }
-           }
-         } else {
-           console.log('No resources found.');
-         }
-
-         var now = new Date();
-         var halfHourFromNow = new Date(now.getTime() + 30*60000);
-         app.availableResources(justResources, now, halfHourFromNow.toISOString());
-       });
-   }
-
-   var filterResources = function(r) {
-       if (!r.resourceName.includes('archive') && (r.resourceName.includes('Room') || r.resourceName.includes('Standup'))) {
-           return r;
-       }
+   app.refreshResources = function() {
+       var now = new Date();
+       var halfHourFromNow = new Date(now.getTime() + 30*60000);
+       model.getAvailableResources(app.updateResourceCards, now, halfHourFromNow.toISOString());
    }
 
   /************************************************************************
@@ -303,8 +188,7 @@
        if (isSignedIn) {
          app.authorizeButton.style.display = 'none';
          app.signoutButton.style.display = 'block';
-         app.listUpcomingEvents();
-         app.getResources();
+         app.refreshResources();
        } else {
          app.authorizeButton.style.display = 'block';
          app.signoutButton.style.display = 'none';
@@ -330,7 +214,7 @@
     * Install Service Worker
     ************************************************************************/
 
-  if ('serviceWorker' in navigator) {
+  if (app.useServiceWorker && 'serviceWorker' in navigator) {
     navigator.serviceWorker
              .register('./service-worker.js')
              .then(function() { console.log('Service Worker Registered'); });
