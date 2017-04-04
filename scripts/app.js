@@ -31,7 +31,7 @@
     // Client ID and API key from the Developer Console.
     clientId: config.CLIENT_ID,
     // Array of API discovery doc URLs for APIs used by the quickstart.
-    discoveryDocs: ["https://www.googleapis.com/discovery/v1/apis/calendar/v3/rest", 
+    discoveryDocs: ["https://www.googleapis.com/discovery/v1/apis/calendar/v3/rest",
                     "https://www.googleapis.com/discovery/v1/apis/admin/directory_v1/rest"],
     // Authorization scopes required by the API; multiple scopes can be
     // included, separated by spaces.
@@ -49,17 +49,17 @@
       app.googleApi.onload=function(){};
       app.handleClientLoad();
   });
-  
+
   app.googleApi.addEventListener('readystatechange', function() {
       if (app.googleApi.readyState === 'complete') {
           app.googleApi.onload();
       }
   });
-   
+
   app.authorizeButton.addEventListener('click', function(event) {
       app.handleAuthClick(event);
   });
-  
+
   app.signoutButton.addEventListener('click', function(event) {
       app.handleSignoutClick(event);
   });
@@ -233,7 +233,7 @@
 
    app.availableResources = function(resources, timeMin, timeMax) {
        var resourceIds = app.getResourceIds(resources);
-       
+
        resources.forEach(function(r) {
            app.updateResourceCard(r);
        });
@@ -266,12 +266,13 @@
          'maxResults': 50
        }).then(function(response) {
          var resources = response.result.items;
+         var filteredResources = resources.filter(filterResources);
          console.log('Resources:');
 
 
          var justResources = [];
          if (resources.length > 0) {
-           var groupedResources = app.groupBy(resources, 'resourceType');
+           var groupedResources = app.groupBy(filteredResources, 'resourceType');
            for(var resourceKey in groupedResources) {
              console.log(resourceKey + ':');
              for(var resourceIndex in groupedResources[resourceKey]) {
@@ -288,6 +289,13 @@
          var halfHourFromNow = new Date(now.getTime() + 30*60000);
          app.availableResources(justResources, now, halfHourFromNow.toISOString());
        });
+   }
+
+   var filterResources = function(r) {
+       if (!r.resourceName.includes('archive') && (r.resourceName.includes('Room') || r.resourceName.includes('Standup'))) {
+         console.log(r);
+           return r;
+       }
    }
 
   /************************************************************************
@@ -357,12 +365,12 @@
    app.handleSignoutClick = function(event) {
        gapi.auth2.getAuthInstance().signOut();
    }
-  
+
    /************************************************************************
     *
     * Install Service Worker
     ************************************************************************/
-    
+
   if ('serviceWorker' in navigator) {
     navigator.serviceWorker
              .register('./service-worker.js')
