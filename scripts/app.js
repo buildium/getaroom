@@ -1,11 +1,11 @@
 // Copyright 2016 Google Inc.
-// 
+//
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
-// 
+//
 //      http://www.apache.org/licenses/LICENSE-2.0
-// 
+//
 // Unless required by applicable law or agreed to in writing, software
 // distributed under the License is distributed on an "AS IS" BASIS,
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -64,12 +64,47 @@
     app.toggleAddDialog(false);
   });
 
+  //this is really bad code
+  document.getElementById('book-room-button').addEventListener('click', function() {
+      var resource = document.getElementById('resourceId').value;
+      app.bookRoom(resource);
+  })
+
 
   /*****************************************************************************
    *
    * Methods to update/refresh the UI
    *
    ****************************************************************************/
+
+   app.bookRoom = function(resourceId) {
+       var now = new Date();
+       var halfHourFromNow = new Date(now.getTime() + 30*60000);
+       var event = {
+         'summary': 'My Booked Room',
+         'description': 'An event booked through the meeting room service',
+         'start': {
+           'dateTime': now,
+           'timeZone': 'America/New_York',
+         },
+         'end': {
+           'dateTime': halfHourFromNow,
+           'timeZone': 'America/New_York',
+         },
+         'attendees': [
+           {
+               'resource': true,
+               'email': resourceId
+           },
+         ]
+       };
+       gapi.client.calendar.events.insert({
+           calendarId: 'primary',
+           resource: event,
+       }).then(function(response) {
+           appendPre('Event created: ' + response.htmlLink);
+       });
+   };
 
   // Toggles the visibility of the add new city dialog.
   app.toggleAddDialog = function(visible) {
@@ -360,7 +395,7 @@
     ];
     app.saveSelectedCities();
   }
-  
+
   // TODO add service worker code here
   if ('serviceWorker' in navigator) {
     navigator.serviceWorker
@@ -377,7 +412,7 @@ var DISCOVERY_DOCS = ["https://www.googleapis.com/discovery/v1/apis/calendar/v3/
 
 // Authorization scopes required by the API; multiple scopes can be
 // included, separated by spaces.
-var SCOPES = "https://www.googleapis.com/auth/calendar.readonly https://www.googleapis.com/auth/admin.directory.resource.calendar.readonly";
+var SCOPES = "https://www.googleapis.com/auth/calendar https://www.googleapis.com/auth/admin.directory.resource.calendar";
 
 var authorizeButton = document.getElementById('authorize-button');
 var signoutButton = document.getElementById('signout-button');
@@ -564,9 +599,6 @@ gapi.client.directory.resources.calendars.list({
 
   var now = new Date();
   var halfHourFromNow = new Date(now.getTime() + 30*60000);
-  availableResources(justResources, now, halfHourFromNow.toISOString()); 
+  availableResources(justResources, now, halfHourFromNow.toISOString());
 });
-}
-
-
-
+};
