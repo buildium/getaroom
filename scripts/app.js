@@ -373,11 +373,11 @@
 var CLIENT_ID = config.CLIENT_ID;
 
 // Array of API discovery doc URLs for APIs used by the quickstart
-var DISCOVERY_DOCS = ["https://www.googleapis.com/discovery/v1/apis/calendar/v3/rest"];
+var DISCOVERY_DOCS = ["https://www.googleapis.com/discovery/v1/apis/calendar/v3/rest", "https://www.googleapis.com/discovery/v1/apis/admin/directory_v1/rest"];
 
 // Authorization scopes required by the API; multiple scopes can be
 // included, separated by spaces.
-var SCOPES = "https://www.googleapis.com/auth/calendar.readonly";
+var SCOPES = "https://www.googleapis.com/auth/calendar.readonly https://www.googleapis.com/auth/admin.directory.resource.calendar.readonly";
 
 var authorizeButton = document.getElementById('authorize-button');
 var signoutButton = document.getElementById('signout-button');
@@ -418,6 +418,7 @@ if (isSignedIn) {
   authorizeButton.style.display = 'none';
   signoutButton.style.display = 'block';
   listUpcomingEvents();
+  var resources = getResources();
 } else {
   authorizeButton.style.display = 'block';
   signoutButton.style.display = 'none';
@@ -490,5 +491,82 @@ gapi.client.calendar.events.list({
   } else {
     appendPre('No upcoming events found.');
   }
+})
+};
+
+var groupBy = function(xs, key) {
+  return xs.reduce(function(rv, x) {
+    (rv[x[key]] = rv[x[key]] || []).push(x);
+    return rv;
+  }, {});
+};
+
+var getResourceIds = function(resources) {
+  var items = [];
+  for (r in resources) {
+    if (resources[r].resourceEmail) {
+      var resource = { 'id' : resources[r].resourceEmail };
+      items.push(resource)
+    }
+  }
+
+  return items;
+}
+
+function availableResources(resources, timeMin, timeMax) {
+  var resourceIds = getResourceIds(resources);
+gapi.client.calendar.freebusy.query({
+  'items': resourceIds,
+  'timeMin': timeMin,
+  'timeMax': timeMax
+}).then(function(response) {
+  var calendars = response.result.calendars;
+  appendPre('Available rooms from:' + timeMin + ' to ' + timeMax);
+
+  if (calendars) {
+    for (r in calendars) {
+      var resource = calendars[r];
+      var busy = resource.busy;
+      var errors = resource.errors;
+      if (!errors && busy && busy.length === 0) {
+        appendPre(r)
+      }
+    }
+  } else {
+    appendPre('No upcoming events found.');
+  }
+})
+};
+
+var getResources = function() {
+gapi.client.directory.resources.calendars.list({
+  'customer': 'my_customer',
+  'maxResults': 50
+}).then(function(response) {
+  var resources = response.result.items;
+  appendPre('Resources:');
+
+
+  var justResources = [];
+  if (resources.length > 0) {
+    var groupedResources = groupBy(resources, 'resourceType');
+    for(resourceKey in groupedResources) {
+      appendPre(resourceKey + ':');
+      for(resourceIndex in groupedResources[resourceKey]) {
+        var resource = groupedResources[resourceKey][resourceIndex]
+        appendPre(resource.resourceName + ' - ' + resource.resourceEmail);
+        justResources.push(resource);
+      }
+    }
+  } else {
+    appendPre('No resources found.');
+  }
+
+  var now = new Date();
+  var halfHourFromNow = new Date(now.getTime() + 30*60000);
+  availableResources(justResources, now, halfHourFromNow.toISOString()); 
 });
 }
+
+
+
