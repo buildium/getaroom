@@ -1,12 +1,12 @@
 <!--
  Copyright 2016 Google Inc.
- 
+
  Licensed under the Apache License, Version 2.0 (the "License");
  you may not use this file except in compliance with the License.
  You may obtain a copy of the License at
- 
+
       http://www.apache.org/licenses/LICENSE-2.0
- 
+
  Unless required by applicable law or agreed to in writing, software
  distributed under the License is distributed on an "AS IS" BASIS,
  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -21,7 +21,7 @@
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
   <link rel="canonical" href="https://weather-pwa-sample.firebaseapp.com/final/">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Weather PWA</title>
+  <title>Meeting Rooms</title>
   <link rel="stylesheet" type="text/css" href="styles/inline.css">
 
   <!-- TODO add manifest here -->
@@ -29,7 +29,7 @@
   <!-- Add to home screen for Safari on iOS -->
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black">
-  <meta name="apple-mobile-web-app-title" content="Weather PWA">
+  <meta name="apple-mobile-web-app-title" content="Meeting Rooms">
   <link rel="apple-touch-icon" href="images/icons/icon-152x152.png">
   <meta name="msapplication-TileImage" content="images/icons/icon-144x144.png">
   <meta name="msapplication-TileColor" content="#2F3BA2">
@@ -37,7 +37,7 @@
 <body>
 
   <header class="header">
-    <h1 class="header__title">Weather PWA</h1>
+    <h1 class="header__title">Meeting Rooms</h1>
     <button id="butRefresh" class="headerButton" aria-label="Refresh"></button>
     <button id="butAdd" class="headerButton" aria-label="Add"></button>
     <button id="authorize-button" style="display: none;">Authorize</button>
@@ -47,13 +47,17 @@
 
   <main class="main">
     <pre id="content"></pre>
-    <div class="card cardTemplate weather-forecast" hidden>
-      <div class="city-key" hidden></div>
+    <div class="empty-view">
+      <h2>No rooms match your criteria.</h2>
+      <h3>Try changing your filters and search again.</h3>
+    </div>
+    <div class="card cardTemplate weather-forecast room" hidden>
+      <div class="city-key room-key" hidden></div>
       <div class="card-last-updated" hidden></div>
-      <div class="location"></div>
-      <div class="date"></div>
+      <div class="location name"></div>
+      <div class="date type"></div>
       <div class="description"></div>
-      <div class="current">
+      <div class="current" style="display: none;">
         <div class="visual">
           <div class="icon"></div>
           <div class="temperature">
@@ -71,7 +75,8 @@
           <div class="sunset"></div>
         </div>
       </div>
-      <div class="future">
+      <button class="reserve-room-button"></button>
+      <div class="future" style="display: none;">
         <div class="oneday">
           <div class="date"></div>
           <div class="icon"></div>

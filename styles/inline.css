@@ -1,12 +1,12 @@
 /*
  * Copyright 2016 Google Inc.
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -62,7 +62,7 @@ body {
   width: 100%;
   height: 56px;
   color: #FFF;
-  background: #3F51B5;
+  background: #39404F;
   position: fixed;
   font-size: 20px;
   box-shadow: 0 4px 5px 0 rgba(0, 0, 0, 0.14), 0 2px 9px 1px rgba(0, 0, 0, 0.12), 0 4px 2px -2px rgba(0, 0, 0, 0.2);
@@ -102,7 +102,6 @@ body {
     margin-right: 16px;
     text-indent: -30000px;
     overflow: hidden;
-    opacity: 0.54;
     -webkit-transition: opacity 0.333s cubic-bezier(0, 0, 0.21, 1);
     transition: opacity 0.333s cubic-bezier(0, 0, 0.21, 1);
     border: none;
@@ -111,7 +110,7 @@ body {
   .header #butRefresh {
     background: url(/images/ic_refresh_white_24px.svg) center center no-repeat; }
   .header #butAdd {
-    background: url(/images/ic_add_white_24px.svg) center center no-repeat; }
+    background: url(/images/ic_filter_list_white_24px.svg) center center no-repeat; }
 
 .header__title {
   font-weight: 400;
@@ -191,6 +190,16 @@ body {
   overflow-y: auto;
   -webkit-overflow-scrolling: touch; }
 
+.empty-view {
+  display: none;
+  margin: 16px;
+  padding: 60px 16px;
+  text-align: center; }
+  .empty-view h2 {
+    font-size: 2em; }
+  .empty-view h3 {
+    font-size: 1.1em; }
+
 .dialog-container {
   background: rgba(0, 0, 0, 0.57);
   position: fixed;
@@ -237,6 +246,8 @@ body {
   .dialog-body select {
     width: 100%;
     font-size: 2em; }
+  .dialog-body p {
+    margin-top: 0; }
 
 .dialog-buttons {
   padding: 8px !important;
@@ -251,109 +262,124 @@ body {
   margin: 16px;
   box-shadow: 0 2px 2px 0 rgba(0, 0, 0, 0.14), 0 3px 1px -2px rgba(0, 0, 0, 0.2), 0 1px 5px 0 rgba(0, 0, 0, 0.12); }
 
-.weather-forecast .location {
+.room .name {
   font-size: 1.75em; }
 
-.weather-forecast .date, .weather-forecast .description {
+.room .name, .room .type {
+  margin-bottom: 6px; }
+
+.room .type, .room .description {
   font-size: 1.25em; }
 
-.weather-forecast .current {
+.room .current {
   display: -webkit-box;
   display: -webkit-flex;
   display: -ms-flexbox;
   display: flex; }
-  .weather-forecast .current .icon {
+  .room .current .icon {
     width: 128px;
     height: 128px; }
-  .weather-forecast .current .visual {
+  .room .current .visual {
     display: -webkit-box;
     display: -webkit-flex;
     display: -ms-flexbox;
     display: flex;
     font-size: 4em; }
-    .weather-forecast .current .visual .scale {
+    .room .current .visual .scale {
       font-size: 0.5em;
       vertical-align: super; }
-  .weather-forecast .current .visual, .weather-forecast .current .description {
+  .room .current .visual, .room .current .description {
     -webkit-box-flex: 1;
     -webkit-flex-grow: 1;
         -ms-flex-positive: 1;
             flex-grow: 1; }
-  .weather-forecast .current .sunset:before {
+  .room .current .sunset:before {
     content: "Sunset: ";
     color: #888; }
-  .weather-forecast .current .wind:before {
+  .room .current .wind:before {
     content: "Wind: ";
     color: #888; }
-  .weather-forecast .current .sunrise:before {
+  .room .current .sunrise:before {
     content: "Sunrise: ";
     color: #888; }
-  .weather-forecast .current .humidity:before {
+  .room .current .humidity:before {
     content: "Humidity: ";
     color: #888; }
-  .weather-forecast .current .pollen:before {
+  .room .current .pollen:before {
     content: "Pollen Count: ";
     color: #888; }
-  .weather-forecast .current .pcount:before {
+  .room .current .pcount:before {
     content: "Pollen ";
     color: #888; }
 
-.weather-forecast .future {
+.room .future {
   display: -webkit-box;
   display: -webkit-flex;
   display: -ms-flexbox;
   display: flex; }
-  .weather-forecast .future .oneday {
+  .room .future .oneday {
     -webkit-box-flex: 1;
     -webkit-flex-grow: 1;
         -ms-flex-positive: 1;
             flex-grow: 1;
     text-align: center; }
-    .weather-forecast .future .oneday .icon {
+    .room .future .oneday .icon {
       width: 64px;
       height: 64px;
       margin-left: auto;
       margin-right: auto; }
-    .weather-forecast .future .oneday .temp-high, .weather-forecast .future .oneday .temp-low {
+    .room .future .oneday .temp-high, .room .future .oneday .temp-low {
       display: inline-block; }
-    .weather-forecast .future .oneday .temp-low {
+    .room .future .oneday .temp-low {
       color: #888; }
 
-.weather-forecast .icon {
+.room .icon {
   background-repeat: no-repeat;
   background-size: contain; }
-  .weather-forecast .icon.clear-day {
+  .room .icon.clear-day {
     background-image: url("/images/clear.png"); }
-  .weather-forecast .icon.clear-night {
+  .room .icon.clear-night {
     background-image: url("/images/clear.png"); }
-  .weather-forecast .icon.rain {
+  .room .icon.rain {
     background-image: url("/images/rain.png"); }
-  .weather-forecast .icon.snow {
+  .room .icon.snow {
     background-image: url("/images/snow.png"); }
-  .weather-forecast .icon.sleet {
+  .room .icon.sleet {
     background-image: url("/images/sleet.png"); }
-  .weather-forecast .icon.windy {
+  .room .icon.windy {
     background-image: url("/images/wind.png"); }
-  .weather-forecast .icon.fog {
+  .room .icon.fog {
     background-image: url("/images/fog.png"); }
-  .weather-forecast .icon.cloudy {
+  .room .icon.cloudy {
     background-image: url("/images/cloudy.png"); }
-  .weather-forecast .icon.partly-cloudy-day {
+  .room .icon.partly-cloudy-day {
     background-image: url("/images/partly-cloudy.png"); }
-  .weather-forecast .icon.partly-cloudy-night {
+  .room .icon.partly-cloudy-night {
     background-image: url("/images/partly-cloudy.png"); }
-  .weather-forecast .icon.thunderstorms {
+  .room .icon.thunderstorms {
     background-image: url("/images/thunderstorm.png"); }
 
+.room .reserve-room-button {
+  background: url(/images/ic_add_white_24px.svg) center center no-repeat;
+  background-color: #73b680;
+  border: none;
+  border-radius: 50%;
+  padding: 20px;
+  position: absolute;
+  right: 15px;
+  bottom: 15px;
+  cursor: pointer;
+  box-shadow: 0 2px 2px 0 rgba(0, 0, 0, 0.14), 0 3px 1px -2px rgba(0, 0, 0, 0.2), 0 1px 5px 0 rgba(0, 0, 0, 0.12); }
+
 @media (max-width: 450px) {
-  .weather-forecast .date, .weather-forecast .description {
+  .room .type, .room .description {
     font-size: 0.9em; }
-  .weather-forecast .current .icon {
+  .room .current .icon {
     width: 96px;
     height: 96px; }
-  .weather-forecast .current .visual {
+  .room .current .visual {
     font-size: 3em; }
-  .weather-forecast .future .oneday .icon {
+  .room .future .oneday .icon {
     width: 32px;
     height: 32px; } }
 
