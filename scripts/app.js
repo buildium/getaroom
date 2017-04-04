@@ -226,12 +226,13 @@
          'maxResults': 50
        }).then(function(response) {
          var resources = response.result.items;
+         var filteredResources = resources.filter(filterResources);
          console.log('Resources:');
 
 
          var justResources = [];
          if (resources.length > 0) {
-           var groupedResources = app.groupBy(resources, 'resourceType');
+           var groupedResources = app.groupBy(filteredResources, 'resourceType');
            for(var resourceKey in groupedResources) {
              console.log(resourceKey + ':');
              for(var resourceIndex in groupedResources[resourceKey]) {
@@ -248,6 +249,12 @@
          var halfHourFromNow = new Date(now.getTime() + 30*60000);
          app.availableResources(justResources, now, halfHourFromNow.toISOString());
        });
+   }
+
+   var filterResources = function(r) {
+       if (!r.resourceName.includes('archive') && (r.resourceName.includes('Room') || r.resourceName.includes('Standup'))) {
+           return r;
+       }
    }
 
   /************************************************************************
