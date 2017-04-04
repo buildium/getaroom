@@ -107,6 +107,13 @@ body {
     border: none;
     outline: none;
     cursor: pointer; }
+  .header .headerLoginButton {
+      background: none;
+      border: none;
+      color: white;
+      text-transform: uppercase;
+      margin-top: -18px;
+      cursor: pointer; }
   .header #butRefresh {
     background: url(/images/ic_refresh_white_24px.svg) center center no-repeat; }
   .header #butAdd {
@@ -263,101 +270,28 @@ body {
   box-shadow: 0 2px 2px 0 rgba(0, 0, 0, 0.14), 0 3px 1px -2px rgba(0, 0, 0, 0.2), 0 1px 5px 0 rgba(0, 0, 0, 0.12); }
 
 .room .name {
-  font-size: 1.75em; }
-
-.room .name, .room .type {
-  margin-bottom: 6px; }
+  font-size: 1.5em; }
 
 .room .type, .room .description {
-  font-size: 1.25em; }
+  margin-top: 6px; }
 
-.room .current {
-  display: -webkit-box;
-  display: -webkit-flex;
-  display: -ms-flexbox;
-  display: flex; }
-  .room .current .icon {
-    width: 128px;
-    height: 128px; }
-  .room .current .visual {
-    display: -webkit-box;
-    display: -webkit-flex;
-    display: -ms-flexbox;
-    display: flex;
-    font-size: 4em; }
-    .room .current .visual .scale {
-      font-size: 0.5em;
-      vertical-align: super; }
-  .room .current .visual, .room .current .description {
-    -webkit-box-flex: 1;
-    -webkit-flex-grow: 1;
-        -ms-flex-positive: 1;
-            flex-grow: 1; }
-  .room .current .sunset:before {
-    content: "Sunset: ";
-    color: #888; }
-  .room .current .wind:before {
-    content: "Wind: ";
-    color: #888; }
-  .room .current .sunrise:before {
-    content: "Sunrise: ";
-    color: #888; }
-  .room .current .humidity:before {
-    content: "Humidity: ";
-    color: #888; }
-  .room .current .pollen:before {
-    content: "Pollen Count: ";
-    color: #888; }
-  .room .current .pcount:before {
-    content: "Pollen ";
-    color: #888; }
+.room .type {
+  font-size: 1.1em; }
 
-.room .future {
-  display: -webkit-box;
-  display: -webkit-flex;
-  display: -ms-flexbox;
-  display: flex; }
-  .room .future .oneday {
-    -webkit-box-flex: 1;
-    -webkit-flex-grow: 1;
-        -ms-flex-positive: 1;
-            flex-grow: 1;
-    text-align: center; }
-    .room .future .oneday .icon {
-      width: 64px;
-      height: 64px;
-      margin-left: auto;
-      margin-right: auto; }
-    .room .future .oneday .temp-high, .room .future .oneday .temp-low {
-      display: inline-block; }
-    .room .future .oneday .temp-low {
-      color: #888; }
+.room .description {
+    font-size: 1em; }
 
-.room .icon {
-  background-repeat: no-repeat;
-  background-size: contain; }
-  .room .icon.clear-day {
-    background-image: url("/images/clear.png"); }
-  .room .icon.clear-night {
-    background-image: url("/images/clear.png"); }
-  .room .icon.rain {
-    background-image: url("/images/rain.png"); }
-  .room .icon.snow {
-    background-image: url("/images/snow.png"); }
-  .room .icon.sleet {
-    background-image: url("/images/sleet.png"); }
-  .room .icon.windy {
-    background-image: url("/images/wind.png"); }
-  .room .icon.fog {
-    background-image: url("/images/fog.png"); }
-  .room .icon.cloudy {
-    background-image: url("/images/cloudy.png"); }
-  .room .icon.partly-cloudy-day {
-    background-image: url("/images/partly-cloudy.png"); }
-  .room .icon.partly-cloudy-night {
-    background-image: url("/images/partly-cloudy.png"); }
-  .room .icon.thunderstorms {
-    background-image: url("/images/thunderstorm.png"); }
+.room[data-room-type="conference-room"] .name {
+    color: #73b680; }
+
+.room[data-room-type="focus-room"] .name {
+    color: #39404F; }
+
+.room[data-room-type="boardroom"] .name {
+    color: #5f006a; }
+
+.room[data-room-type="webinar"] .name {
+    color: #6a96ca; }
 
 .room .reserve-room-button {
   background: url(/images/ic_add_white_24px.svg) center center no-repeat;
@@ -374,14 +308,6 @@ body {
 @media (max-width: 450px) {
   .room .type, .room .description {
     font-size: 0.9em; }
-  .room .current .icon {
-    width: 96px;
-    height: 96px; }
-  .room .current .visual {
-    font-size: 3em; }
-  .room .future .oneday .icon {
-    width: 32px;
-    height: 32px; } }
 
 .mdl-button {
   background: transparent;

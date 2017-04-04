@@ -94,7 +94,7 @@
            appendPre('Event created: ' + response.htmlLink);
        });
    };
-   
+
    app.updateResourceCards = function(resources) {
        resources.forEach(function(resource) {
            app.updateResourceCard(resource);
@@ -104,7 +104,7 @@
   app.updateResourceCard = function(resource) {
     var resourceId = resource.resourceId;
     var resourceEmail = resource.resourceEmail;
-    var resourceName = resource.resourceName;
+    var resourceName = getResourceName(resource.resourceName);
     var resourceDescription = resource.resourceDescription;
     var resourceType = resource.resourceType;
 
@@ -117,6 +117,7 @@
       app.visibleCards[resourceId] = card;
     }
 
+    card.setAttribute('data-room-type', getRoomType(resourceType));
     card.querySelector('.location').textContent = resourceName;
     card.querySelector('.type').textContent = resourceType;
     card.querySelector('.description').textContent = resourceDescription;
@@ -231,4 +232,37 @@ function appendPre(message) {
     var pre = document.getElementById('content');
     var textContent = document.createTextNode(message + '\n');
     pre.appendChild(textContent);
+}
+
+/**
+* Trim the resourceName string to remove text before dash and colons
+*
+* @param {string} name Text to be trimmed.
+*/
+function getResourceName(name) {
+    var nameArray = name.split(' - ');
+    if (nameArray.length > 1) {
+        var newName = nameArray[1].split(' (')[0];
+        return newName;
+    }
+    return name;
+}
+
+/**
+* Returns a data attribute string for the card element based on the resource's resourceType
+*
+* @param {string} type The resourceType of the resource element
+*/
+function getRoomType(type) {
+    if (type.indexOf('Conference room') != -1) {
+        return 'conference-room';
+    } else if (type.indexOf('Focus Room') != -1) {
+        return 'focus-room';
+    } else if (type.indexOf('Boardroom') != -1) {
+        return 'boardroom';
+    } else if (type.indexOf('Webinar') != -1) {
+        return 'webinar';
+    }
+
+    return 'default';
 }
