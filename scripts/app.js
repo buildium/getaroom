@@ -215,7 +215,7 @@
         gapi.auth2.getAuthInstance().isSignedIn.listen(app.updateSigninStatus);
         
         // Sign in on init
-        if (!gapi.auth2.getAuthInstance().isSignedIn) {
+        if (!gapi.auth2.getAuthInstance().isSignedIn.get()) {
           gapi.auth2.getAuthInstance().signIn();        
         }         
 
