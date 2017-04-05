@@ -38,8 +38,29 @@
   <header class="header">
     <h1 class="header__title">Get a room</h1>
     <button id="butRefresh" class="headerButton" aria-label="Refresh"></button>
-    <button id="authorize-button" class="headerLoginButton">Authorize</button>
-    <button id="signout-button" class="headerLoginButton" style="display: none;">Sign Out</button>
+    <button id="butFilter" class="headerButton" aria-label="Filter"></button>
+    <div class="filter-list" style="display: none;">
+        <div>
+            <ul class="type-filters">
+                <p>Types</p>
+                <li><input type="checkbox" name="room-type" value="conference-room"><span>Conference Rooms</span></li>
+                <li><input type="checkbox" name="room-type" value="focus-room"><span>Focus Rooms</span></li>
+                <li><input type="checkbox" name="room-type" value="boardroom"><span>Boardroom</span></li>
+                <li><input type="checkbox" name="room-type" value="webinar"><span>Webinar</span></li>
+            </ul>
+            <ul class="feature-filters">
+                <p>Features</p>
+                <li><input type="checkbox" name="room-feature" value="mac-mini"><span>Mac Mini</span></li>
+                <li><input type="checkbox" name="room-feature" value="monitor"><span>Monitor</span></li>
+                <li><input type="checkbox" name="room-feature" value="camera"><span>Camera</span></li>
+                <li><input type="checkbox" name="room-feature" value="mic"><span>Mic</span></li>
+            </ul>
+        </div>
+
+        <button id="apply-filters-button">Apply</button>
+    </div>
+    <button id="authorize-button" class="headerLoginButton" aria-label="Authorize">Authorize</button>
+    <button id="signout-button" class="headerLoginButton" style="display: none;" aria-label="Sign Out">Sign Out</button>
 
   </header>
 
@@ -53,14 +74,18 @@
       <h2>Oops...No rooms available</h2>
       <h3>There are currently no available rooms.<br>Please try changing any filters and search again.</h3>
     </div>
-    <div class="card cardTemplate room" hidden>
-      <div class="room-key" hidden></div>
-      <div class="card-last-updated" hidden></div>
-      <div class="name"></div>
-      <div class="type"></div>
-      <div class="description"></div>
-      <div class="user-message"></div>
-      <button class="reserve-room-button"></button>
+    <div class="room-cards">
+        <div class="card cardTemplate room" hidden>
+          <div class="room-key" hidden></div>
+          <div class="card-last-updated" hidden></div>
+          <div class="name"></div>
+          <div class="type"></div>
+          <div class="description"></div>
+          <div class="user-message"></div>
+          <div class="user-action">
+            <button class="reserve-room-button"></button>
+          </div>
+        </div>
     </div>
   </main>
 

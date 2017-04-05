@@ -26,9 +26,11 @@
     cardTemplate: document.querySelector('.cardTemplate'),
     container: document.querySelector('.main'),
     rooms: document.querySelector('.rooms'),
+    container: document.querySelector('.main .room-cards'),
     addDialog: document.querySelector('.dialog-container'),
     authorizeButton: document.getElementById('authorize-button'),
     signoutButton: document.getElementById('signout-button'),
+    filterList: document.querySelector('.filter-list'),
     googleApi: document.getElementById('google-api'),
     daysOfWeek: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'],
     clientId: config.CLIENT_ID,
@@ -66,6 +68,14 @@
       return gapi.auth2.getAuthInstance().isSignedIn.get();
    }
 
+  document.getElementById('butFilter').addEventListener('click', function() {
+     if(app.filterList.style.display == 'block') {
+         app.filterList.style.display = 'none'
+     } else {
+         app.filterList.style.display = 'block'
+     }
+  });
+
 
   /*****************************************************************************
    *
@@ -99,6 +109,7 @@
            resource: event,
        }).then(function(response) {
            card.querySelector('.user-message').innerHTML = '<span class=\'success\'>Successfully booked room! Click <a target=_blank href=\'' + response.result.htmlLink + '\'>here</a> to view in calendar</span>';
+           card.querySelector('.reserve-room-button').classList.add('reserved');
        });
    };
 
@@ -111,14 +122,17 @@
            if (items.length > 0) {
                model.getResources(function(resources) {
                    items.forEach(function(item) {
-                       item.attendees.forEach(function(attendee) {
-                           resources.forEach(function(resource) {
-                               if (resource.resourceEmail === attendee.email) {
-                                   card.querySelector('.user-message').innerHTML = '<span class=\'failure\'>Failed to book room. You already have a booked room during this time.</span>';
-                                   userAlreadyBookedRoom = true;
-                               }
-                           });
-                       });
+                       if (item.attendees) {
+                         item.attendees.forEach(function(attendee) {
+                             resources.forEach(function(resource) {
+                                 if (resource.resourceEmail === attendee.email) {
+                                     card.querySelector('.user-message').innerHTML = '<span class=\'failure\'>Failed to book room. You already have a booked room during this time.</span>';
+                                     card.querySelector('.reserve-room-button').classList.remove('reserved');
+                                     userAlreadyBookedRoom = true;
+                                 }
+                             });
+                         });
+                      }
                    });
                    if (!userAlreadyBookedRoom) {
                        app.bookRoom(resourceId, card);
@@ -127,6 +141,30 @@
            } else {
                app.bookRoom(resourceId, card);
            }
+       });
+   }
+
+   app.getUsersCurrentResources = function(callback) {
+       var now = new Date();
+       var halfHourFromNow = new Date(now.getTime() + 30*60000);
+       var currentResources = [];
+       model.getCurrentEvents(now.toISOString(), halfHourFromNow.toISOString(), function(items) {
+           model.getResources(function(resources) {
+               resources.forEach(function(resource) {
+                   items.forEach(function(item) {
+                    if (item.attendees) {
+                       item.attendees.forEach(function(attendee) {
+                           if (attendee.email === resource.resourceEmail) {
+                               resource.isBooked = true;
+                               resource.eventLink = item.htmlLink;
+                               currentResources.push(resource);
+                           }
+                       });
+                     }
+                   });
+               });
+               callback(currentResources);
+           });
        });
    }
 
@@ -140,27 +178,6 @@
        resources.forEach(function(resource) {
            app.updateResourceCard(resource);
        });
-   }
-
-   app.removeResourceCards = function(resources) {
-      if (Object.keys(resources).length > 0) {
-        resources.forEach(function(resource) {
-           app.removeResourceCard(resource);
-       });
-      }
-   }
-
-   app.removeResourceCard = function(resource) {
-      var resourceId = resource.resourceId;
-      var card = app.visibleCards[resourceId];
-
-      if (!card) {
-        return;
-      }
-
-      card.setAttribute('hidden', true);
-      app.container.removeChild(card);
-      app.visibleCards[resourceId] = null;
    }
 
   app.updateResourceCard = function(resource) {
@@ -177,9 +194,15 @@
       card.removeAttribute('hidden');
       app.container.appendChild(card);
       app.visibleCards[resourceId] = card;
-      card.querySelector(".reserve-room-button").addEventListener('click', function() {
-        app.bookRoom(resourceEmail, card);
-      });
+      var actionButton = card.querySelector(".room .user-action");
+      if (resource.isBooked) {
+          var calendarLink = resource.eventLink ? resource.eventLink : 'calendar.google.com';
+          actionButton.innerHTML = '<a class=\'gcalendar-link\' target=\'_blank\' href=\'' + calendarLink +'\'><img src=\'../images/gcalendar.png\'></a>';
+      } else {
+            card.querySelector(".reserve-room-button").addEventListener('click', function() {
+            app.bookRoom(resourceEmail, card);
+          });
+      }
     }
 
     card.setAttribute('data-room-type', getRoomType(resourceType));
@@ -209,7 +232,16 @@
        }
        var now = new Date();
        var halfHourFromNow = new Date(now.getTime() + 30*60000);
-       model.getAvailableResources(now, halfHourFromNow.toISOString(), app.updateResourceCards);
+       clearCards();
+       app.getUsersCurrentResources(function(resources) {
+           app.updateResourceCards(resources); //set user's resources if any
+           model.getAvailableResources(now, halfHourFromNow.toISOString(), app.updateResourceCards);//set available resources
+       })
+   }
+
+   var clearCards = function() {
+       app.container.innerHTML = '';
+       app.visibleCards = {};
    }
 
   /************************************************************************
@@ -270,8 +302,7 @@
          app.authorizeButton.style.display = 'block';
          app.signoutButton.style.display = 'none';
          app.notAuthorizedView.style.display = 'block';
-         app.removeResourceCards(app.visibleCards);
-         app.visibleCards = {};
+         clearCards();
          app.removeLoading();
        }
    }
