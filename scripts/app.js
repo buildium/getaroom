@@ -143,7 +143,7 @@
    }
 
    app.removeResourceCards = function(resources) {
-      if (resources.length > 0) {
+      if (Object.keys(resources).length > 0) {
         resources.forEach(function(resource) {
            app.removeResourceCard(resource);
        });
