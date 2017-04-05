@@ -66,7 +66,7 @@
    *
    ****************************************************************************/
 
-   app.bookRoom = function(resourceId) {
+   app.bookRoom = function(resourceId, card) {
        var now = new Date();
        var halfHourFromNow = new Date(now.getTime() + 30*60000);
        var event = {
@@ -91,7 +91,7 @@
            calendarId: 'primary',
            resource: event,
        }).then(function(response) {
-           appendPre('Event created: ' + response.htmlLink);
+           card.querySelector('.user-message').innerHTML = '<span class=\'success\'>Success! Click <a target=_blank href=\'' + response.result.htmlLink + '\'>here</a> to view in calendar</span>';
        });
    };
 
@@ -115,15 +115,15 @@
       card.removeAttribute('hidden');
       app.container.appendChild(card);
       app.visibleCards[resourceId] = card;
+      card.querySelector(".reserve-room-button").addEventListener('click', function() {
+        app.bookRoom(resourceEmail, card);
+      });
     }
 
     card.setAttribute('data-room-type', getRoomType(resourceType));
     card.querySelector('.location').textContent = resourceName;
     card.querySelector('.type').textContent = resourceType;
     card.querySelector('.description').textContent = resourceDescription;
-    card.querySelector(".reserve-room-button").addEventListener('click', function() {
-      app.bookRoom(resourceEmail);
-    });
     if (app.isLoading) {
       app.spinner.setAttribute('hidden', true);
       app.container.removeAttribute('hidden');
