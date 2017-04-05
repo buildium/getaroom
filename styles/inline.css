@@ -116,8 +116,51 @@ body {
       cursor: pointer; }
   .header #butRefresh {
     background: url(/images/ic_refresh_white_24px.svg) center center no-repeat; }
-  .header #butAdd {
+  .header #butFilter {
     background: url(/images/ic_filter_list_white_24px.svg) center center no-repeat; }
+    .header .filter-list {
+        position: absolute;
+        right: 0;
+        top: 56px;
+        background-color: white;
+        box-shadow: 0 4px 5px 0 rgba(0, 0, 0, 0.14), 0 2px 9px 1px rgba(0, 0, 0, 0.12), 0 4px 2px -2px rgba(0, 0, 0, 0.2);
+        text-align: center; }
+    .header .filter-list ul {
+        color: black;
+        list-style-type: none;
+        padding: 0 20px;
+        margin-bottom: 10px;
+        text-align: left;
+        float: left; }
+    .header .filter-list ul p {
+        margin: 0 0 10px;
+        font-size: 0.8em;
+        font-weight: bold; }
+    .header .filter-list ul li {
+        margin-bottom: 10px;
+        font-size: 0.7em;
+        float: left;
+        clear: both; }
+    .header .filter-list ul li input {
+        float: left;
+        clear: both;
+        margin: 0 10px 0 0;
+        width: 20px;
+        height: 20px; }
+    .header .filter-list ul li span {
+        float: left;
+        margin-top: 2px; }
+    .header #apply-filters-button {
+        padding: 15px 50px;
+        margin: 10px 0 20px;
+        background: transparent;
+        border: 0;
+        background-color: #73b680;
+        border-radius: 4px;
+        color: white;
+        text-transform: uppercase;
+        font-weight: bold;
+        cursor: pointer; }
 
 .header__title {
   font-weight: 400;
@@ -289,7 +332,8 @@ body {
 
 .dialog-buttons {
   padding: 8px !important;
-  float: right; }
+  float: right;
+}
 
 .card {
   padding: 16px;
@@ -298,19 +342,58 @@ body {
   background: #fff;
   border-radius: 2px;
   margin: 16px;
-  box-shadow: 0 2px 2px 0 rgba(0, 0, 0, 0.14), 0 3px 1px -2px rgba(0, 0, 0, 0.2), 0 1px 5px 0 rgba(0, 0, 0, 0.12); }
+  box-shadow: 0 2px 2px 0 rgba(0, 0, 0, 0.14), 0 3px 1px -2px rgba(0, 0, 0, 0.2), 0 1px 5px 0 rgba(0, 0, 0, 0.12);
+}
+
+/* From https://auth0.com/blog/introduction-to-progressive-apps-part-one/ */
+.toast__container {
+    position: fixed;
+    bottom: 20px;
+    left: 20px;
+    pointer-events: none; }
+.toast__msg {
+    min-width: 250px;
+    min-height: 50px;
+    background: #39404F;
+    color: #fff;
+    display: -webkit-box;
+    display: -ms-flexbox;
+    display: flex;
+    -webkit-box-align: center;
+        -ms-flex-align: center;
+            align-items: center;
+    -webkit-box-pack: justify;
+        -ms-flex-pack: justify;
+            justify-content: space-between;
+    font-size: 14px;
+    font-weight: 500;
+    padding-left: 15px;
+    padding-right: 10px;
+    word-break: break-all;
+    -webkit-transition: opacity 3s cubic-bezier(0, 0, 0.30, 1) 0;
+    -webkit-transition: opacity 0.30s cubic-bezier(0, 0, 0.30, 1) 0;
+    transition: opacity 0.30s cubic-bezier(0, 0, 0.30, 1) 0;
+    text-transform: initial;
+    margin-bottom: 10px;
+    border-radius: 2px; }
+.toast__msg--hide {
+    opacity: 0; }
 
 .room .name {
-  font-size: 1.5em; }
+  font-size: 1.5em;
+}
 
 .room .type, .room .description {
-  margin-top: 6px; }
+  margin-top: 6px;
+}
 
 .room .type {
-  font-size: 1.1em; }
+  font-size: 1.1em;
+}
 
 .room .description {
-    font-size: 1em; }
+    font-size: 1em;
+}
 
 .room[data-room-type="conference-room"] .name {
     color: #73b680; }
@@ -326,7 +409,7 @@ body {
 
 .room .reserve-room-button {
   background: url(/images/ic_add_white_24px.svg) center center no-repeat;
-  background-color: #73b680;
+  background-color: #39404F;
   border: none;
   border-radius: 50%;
   padding: 20px;
@@ -335,7 +418,27 @@ body {
   bottom: 15px;
   cursor: pointer;
   box-shadow: 0 2px 2px 0 rgba(0, 0, 0, 0.14), 0 3px 1px -2px rgba(0, 0, 0, 0.2), 0 1px 5px 0 rgba(0, 0, 0, 0.12); }
+  .room .reserve-room-button.reserved {
+      background: url(/images/ic_check_white_24px.svg) center center no-repeat;
+      background-color: #73b680; }
 
+.room .gcalendar-link img {
+    position: absolute;
+    right: 15px;
+    bottom: 15px;
+    width: 50px;
+    height: 50px;
+}
+
+.room .gcalendar-link img:hover {
+    width: 55px;
+    height: 55px;
+}
+
+.room .user-message {
+    margin-top: 5px;
+    text-align: center;
+}
   .room .user-message .success {
       color: #73B680;
   }

@@ -25,9 +25,12 @@
     spinner: document.querySelector('.loader'),
     cardTemplate: document.querySelector('.cardTemplate'),
     container: document.querySelector('.main'),
+    rooms: document.querySelector('.rooms'),
+    container: document.querySelector('.main .room-cards'),
     addDialog: document.querySelector('.dialog-container'),
     authorizeButton: document.getElementById('authorize-button'),
     signoutButton: document.getElementById('signout-button'),
+    filterList: document.querySelector('.filter-list'),
     googleApi: document.getElementById('google-api'),
     daysOfWeek: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'],
     clientId: config.CLIENT_ID,
@@ -61,9 +64,21 @@
     app.refreshResources();
   });
 
+  app.isSignedIn = function() {
+      return gapi.auth2.getAuthInstance().isSignedIn.get();
+   }
+   
   document.getElementById('30-minute-button').addEventListener('click', function() {
     app.refreshResources(30);
   });
+
+  document.getElementById('butFilter').addEventListener('click', function() {
+     if(app.filterList.style.display == 'block') {
+         app.filterList.style.display = 'none'
+     } else {
+         app.filterList.style.display = 'block'
+     }
+    });
 
   document.getElementById('hour-button').addEventListener('click', function() {
     app.refreshResources(60);
@@ -71,8 +86,7 @@
 
   document.getElementById('90-minute-button').addEventListener('click', function() {
     app.refreshResources(90);
-  });
-
+    
   document.getElementById('2-hour-button').addEventListener('click', function() {
     app.refreshResources(120);
   });
@@ -116,6 +130,7 @@
            resource: event,
        }).then(function(response) {
            card.querySelector('.user-message').innerHTML = '<span class=\'success\'>Successfully booked room! Click <a target=_blank href=\'' + response.result.htmlLink + '\'>here</a> to view in calendar</span>';
+           card.querySelector('.reserve-room-button').classList.add('reserved');
        });
    };
 
@@ -128,14 +143,17 @@
            if (items.length > 0) {
                model.getResources(function(resources) {
                    items.forEach(function(item) {
-                       item.attendees.forEach(function(attendee) {
-                           resources.forEach(function(resource) {
-                               if (resource.resourceEmail === attendee.email) {
-                                   card.querySelector('.user-message').innerHTML = '<span class=\'failure\'>Failed to book room. You already have a booked room during this time.</span>';
-                                   userAlreadyBookedRoom = true;
-                               }
-                           });
-                       });
+                       if (item.attendees) {
+                         item.attendees.forEach(function(attendee) {
+                             resources.forEach(function(resource) {
+                                 if (resource.resourceEmail === attendee.email) {
+                                     card.querySelector('.user-message').innerHTML = '<span class=\'failure\'>Failed to book room. You already have a booked room during this time.</span>';
+                                     card.querySelector('.reserve-room-button').classList.remove('reserved');
+                                     userAlreadyBookedRoom = true;
+                                 }
+                             });
+                         });
+                      }
                    });
                    if (!userAlreadyBookedRoom) {
                        app.bookRoom(resourceId, card);
@@ -144,6 +162,30 @@
            } else {
                app.bookRoom(resourceId, card);
            }
+       });
+   }
+
+   app.getUsersCurrentResources = function(callback) {
+       var now = new Date();
+       var halfHourFromNow = new Date(now.getTime() + 30*60000);
+       var currentResources = [];
+       model.getCurrentEvents(now.toISOString(), halfHourFromNow.toISOString(), function(items) {
+           model.getResources(function(resources) {
+               resources.forEach(function(resource) {
+                   items.forEach(function(item) {
+                    if (item.attendees) {
+                       item.attendees.forEach(function(attendee) {
+                           if (attendee.email === resource.resourceEmail) {
+                               resource.isBooked = true;
+                               resource.eventLink = item.htmlLink;
+                               currentResources.push(resource);
+                           }
+                       });
+                     }
+                   });
+               });
+               callback(currentResources);
+           });
        });
    }
 
@@ -173,9 +215,15 @@
       card.removeAttribute('hidden');
       app.container.appendChild(card);
       app.visibleCards[resourceId] = card;
-      card.querySelector(".reserve-room-button").addEventListener('click', function() {
-        app.bookRoom(resourceEmail, card);
-      });
+      var actionButton = card.querySelector(".room .user-action");
+      if (resource.isBooked) {
+          var calendarLink = resource.eventLink ? resource.eventLink : 'calendar.google.com';
+          actionButton.innerHTML = '<a class=\'gcalendar-link\' target=\'_blank\' href=\'' + calendarLink +'\'><img src=\'../images/gcalendar.png\'></a>';
+      } else {
+            card.querySelector(".reserve-room-button").addEventListener('click', function() {
+            app.bookRoom(resourceEmail, card);
+          });
+      }
     }
 
     card.setAttribute('data-room-type', getRoomType(resourceType));
@@ -200,9 +248,24 @@
    ****************************************************************************/
 
    app.refreshResources = function(minutes = 30) {
+       if (!app.isSignedIn()) {
+        return;
+       }
        var now = new Date();
        var timeFromNow = new Date(now.getTime() + minutes*60000);
-       model.getAvailableResources(now, timeFromNow.toISOString(), app.updateResourceCards);
+       clearCards();
+       app.getUsersCurrentResources(function(resources) {
+          if (resources && resources.length > 0) {
+           app.updateResourceCards(resources); //set user's resources if any
+          }
+          
+           model.getAvailableResources(now, timeFromNow.toISOString(), app.updateResourceCards);//set available resources
+       })
+   }
+
+   var clearCards = function() {
+       app.container.innerHTML = '';
+       app.visibleCards = {};
    }
 
 
@@ -233,13 +296,19 @@
        gapi.client.init({
          discoveryDocs: app.discoveryDocs,
          clientId: app.clientId,
-         scope: app.scopes
-       }).then(function () {
+         scope: app.scopes,
+       }).then(function () {       
+        // Sign in on init
+        if (!app.isSignedIn()) {
+          gapi.auth2.getAuthInstance().signIn();        
+        }         
+
+         // Handle the initial sign-in state.
+         app.updateSigninStatus(app.isSignedIn());
+
          // Listen for sign-in state changes.
          gapi.auth2.getAuthInstance().isSignedIn.listen(app.updateSigninStatus);
 
-         // Handle the initial sign-in state.
-         app.updateSigninStatus(gapi.auth2.getAuthInstance().isSignedIn.get());
          app.authorizeButton.onclick = app.handleAuthClick;
          app.signoutButton.onclick = app.handleSignoutClick;
        });
@@ -251,16 +320,23 @@
    */
    app.updateSigninStatus = function(isSignedIn) {
        if (isSignedIn) {
+         app.refreshResources();
          app.authorizeButton.style.display = 'none';
          app.signoutButton.style.display = 'block';
          app.notAuthorizedView.style.display = 'none';
-         app.refreshResources();
+         app.toastUserGreeting();
        } else {
          app.authorizeButton.style.display = 'block';
          app.signoutButton.style.display = 'none';
          app.notAuthorizedView.style.display = 'block';
+         clearCards();
          app.removeLoading();
        }
+   }
+   
+   app.toastUserGreeting = function() {
+       var email = gapi.auth2.getAuthInstance().currentUser.get().getBasicProfile().getEmail();
+       toast('Hi, ' + email + '!');
    }
 
    /**
@@ -275,6 +351,7 @@
    */
    app.handleSignoutClick = function(event) {
        gapi.auth2.getAuthInstance().signOut();
+       app.removeLoading();
    }
 
    /************************************************************************

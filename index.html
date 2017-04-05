@@ -20,7 +20,7 @@
   <meta charset="utf-8">
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Meeting Rooms</title>
+  <title>Get a room</title>
   <link rel="stylesheet" type="text/css" href="styles/inline.css">
 
   <!-- TODO add manifest here -->
@@ -28,7 +28,7 @@
   <!-- Add to home screen for Safari on iOS -->
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black">
-  <meta name="apple-mobile-web-app-title" content="Meeting Rooms">
+  <meta name="apple-mobile-web-app-title" content="Get a room">
   <link rel="apple-touch-icon" href="images/icons/ms-icon-150x150.png">
   <meta name="msapplication-TileImage" content="images/icons/ms-icon-144x144.png">
   <meta name="msapplication-TileColor" content="#2F3BA2">
@@ -36,7 +36,7 @@
 <body>
 
   <header class="header">
-    <h1 class="header__title">Meeting Rooms</h1>
+    <h1 class="header__title">Get a room</h1>
     <div class="dropdown">
       <button id="trigger-dropdown" class="headerButton dropbtn" aria-label="time-dropdown"></button>
         <div id="myDropdown" class="dropdown-content">
@@ -47,8 +47,29 @@
         </div>
     </div>
     <button id="butRefresh" class="headerButton" aria-label="Refresh"></button>
-    <button id="authorize-button" class="headerLoginButton">Authorize</button>
-    <button id="signout-button" class="headerLoginButton" style="display: none;">Sign Out</button>
+    <button id="butFilter" class="headerButton" aria-label="Filter"></button>
+    <div class="filter-list" style="display: none;">
+        <div>
+            <ul class="type-filters">
+                <p>Types</p>
+                <li><input type="checkbox" name="room-type" value="conference-room"><span>Conference Rooms</span></li>
+                <li><input type="checkbox" name="room-type" value="focus-room"><span>Focus Rooms</span></li>
+                <li><input type="checkbox" name="room-type" value="boardroom"><span>Boardroom</span></li>
+                <li><input type="checkbox" name="room-type" value="webinar"><span>Webinar</span></li>
+            </ul>
+            <ul class="feature-filters">
+                <p>Features</p>
+                <li><input type="checkbox" name="room-feature" value="mac-mini"><span>Mac Mini</span></li>
+                <li><input type="checkbox" name="room-feature" value="monitor"><span>Monitor</span></li>
+                <li><input type="checkbox" name="room-feature" value="camera"><span>Camera</span></li>
+                <li><input type="checkbox" name="room-feature" value="mic"><span>Mic</span></li>
+            </ul>
+        </div>
+
+        <button id="apply-filters-button">Apply</button>
+    </div>
+    <button id="authorize-button" class="headerLoginButton" aria-label="Authorize">Authorize</button>
+    <button id="signout-button" class="headerLoginButton" style="display: none;" aria-label="Sign Out">Sign Out</button>
 
   </header>
 
@@ -62,15 +83,18 @@
       <h2>Oops...No rooms available</h2>
       <h3>There are currently no available rooms.<br>Please try changing any filters and search again.</h3>
     </div>
-
-    <div class="card cardTemplate room" hidden>
-      <div class="room-key" hidden></div>
-      <div class="card-last-updated" hidden></div>
-      <div class="name"></div>
-      <div class="type"></div>
-      <div class="description"></div>
-      <div class="user-message"></div>
-      <button class="reserve-room-button"></button>
+    <div class="room-cards">
+        <div class="card cardTemplate room" hidden>
+          <div class="room-key" hidden></div>
+          <div class="card-last-updated" hidden></div>
+          <div class="name"></div>
+          <div class="type"></div>
+          <div class="description"></div>
+          <div class="user-message"></div>
+          <div class="user-action">
+            <button class="reserve-room-button"></button>
+          </div>
+        </div>
     </div>
   </main>
 
@@ -80,9 +104,12 @@
     </svg>
   </div>
 
+  <div class="toast__container"></div>
+
   <!-- Uncomment the line below when ready to test with fake data -->
   <script src="config.js" async></script>
   <script src="scripts/model.js" async></script>
+  <script src="scripts/toast.js" async></script>
   <script src="scripts/app.js" async></script>
   <script id='google-api' async defer src="https://apis.google.com/js/api.js"></script>
 
