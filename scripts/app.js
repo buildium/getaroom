@@ -169,10 +169,15 @@
        gapi.client.init({
          discoveryDocs: app.discoveryDocs,
          clientId: app.clientId,
-         scope: app.scopes
+         scope: app.scopes,
        }).then(function () {
-         // Listen for sign-in state changes.
-         gapi.auth2.getAuthInstance().isSignedIn.listen(app.updateSigninStatus);
+        // Listen for sign-in state changes.
+        gapi.auth2.getAuthInstance().isSignedIn.listen(app.updateSigninStatus);
+        
+        // Sign in on init
+        if (!gapi.auth2.getAuthInstance().isSignedIn) {
+          gapi.auth2.getAuthInstance().signIn();        
+        }         
 
          // Handle the initial sign-in state.
          app.updateSigninStatus(gapi.auth2.getAuthInstance().isSignedIn.get());
