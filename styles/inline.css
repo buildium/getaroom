@@ -352,6 +352,18 @@ body {
       background: url(/images/ic_check_white_24px.svg) center center no-repeat;
       background-color: #73b680; }
 
+.room .gcalendar-link img {
+    position: absolute;
+    right: 15px;
+    bottom: 15px;
+    width: 50px;
+    height: 50px;
+}
+
+.room .user-message {
+    margin-top: 5px;
+    text-align: center;
+}
   .room .user-message .success {
       color: #73B680;
   }
