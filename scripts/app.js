@@ -294,10 +294,11 @@
    */
    app.updateSigninStatus = function(isSignedIn) {
        if (isSignedIn) {
+         app.refreshResources();
          app.authorizeButton.style.display = 'none';
          app.signoutButton.style.display = 'block';
          app.notAuthorizedView.style.display = 'none';
-         app.refreshResources();
+         app.toastUserGreeting();
        } else {
          app.authorizeButton.style.display = 'block';
          app.signoutButton.style.display = 'none';
@@ -305,6 +306,11 @@
          clearCards();
          app.removeLoading();
        }
+   }
+   
+   app.toastUserGreeting = function() {
+       var email = gapi.auth2.getAuthInstance().currentUser.get().getBasicProfile().getEmail();
+       toast('Hi, ' + email + '!');
    }
 
    /**
