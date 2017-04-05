@@ -80,7 +80,7 @@
   document.getElementById('trigger-dropdown').addEventListener('click', function() {
     document.getElementById('myDropdown').classList.toggle('show');
   });
-    
+
 
 
 
@@ -202,7 +202,6 @@
    app.refreshResources = function(minutes = 30) {
        var now = new Date();
        var timeFromNow = new Date(now.getTime() + minutes*60000);
-       console.log(`Time + params: ${timeFromNow}`);
        model.getAvailableResources(now, timeFromNow.toISOString(), app.updateResourceCards);
    }
 
