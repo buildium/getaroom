@@ -20,6 +20,8 @@
     isLoading: true,
     visibleCards: {},
     selectedCities: [],
+    notAuthorizedView: document.querySelector('#not-authorized-view'),
+    noRoomsView: document.querySelector('#no-rooms-view'),
     spinner: document.querySelector('.loader'),
     cardTemplate: document.querySelector('.cardTemplate'),
     container: document.querySelector('.main'),
@@ -84,7 +86,7 @@
    *
    ****************************************************************************/
 
-   app.bookRoom = function(resourceId) {
+   app.bookRoom = function(resourceId, card) {
        var now = new Date();
        var halfHourFromNow = new Date(now.getTime() + 30*60000);
        var event = {
@@ -109,11 +111,45 @@
            calendarId: 'primary',
            resource: event,
        }).then(function(response) {
-           appendPre('Event created: ' + response.htmlLink);
+           card.querySelector('.user-message').innerHTML = '<span class=\'success\'>Successfully booked room! Click <a target=_blank href=\'' + response.result.htmlLink + '\'>here</a> to view in calendar</span>';
        });
    };
 
+   app.attemptToBookRoom = function(resourceId, card) {
+       var now = new Date();
+       var halfHourFromNow = new Date(now.getTime() + 30*60000);
+       var userAlreadyBookedRoom = false;
+       model.getCurrentEvents(now.toISOString(), halfHourFromNow.toISOString(), function(items) {
+           var userAlreadyBookedRoom = false;
+           if (items.length > 0) {
+               model.getResources(function(resources) {
+                   items.forEach(function(item) {
+                       item.attendees.forEach(function(attendee) {
+                           resources.forEach(function(resource) {
+                               if (resource.resourceEmail === attendee.email) {
+                                   card.querySelector('.user-message').innerHTML = '<span class=\'failure\'>Failed to book room. You already have a booked room during this time.</span>';
+                                   userAlreadyBookedRoom = true;
+                               }
+                           });
+                       });
+                   });
+                   if (!userAlreadyBookedRoom) {
+                       app.bookRoom(resourceId, card);
+                   }
+               });
+           } else {
+               app.bookRoom(resourceId, card);
+           }
+       });
+   }
+
    app.updateResourceCards = function(resources) {
+       if (resources.length > 0) {
+           app.noRoomsView.style.display = 'none';
+       } else {
+           app.noRoomsView.style.display = 'block';
+       }
+
        resources.forEach(function(resource) {
            app.updateResourceCard(resource);
        });
@@ -133,21 +169,25 @@
       card.removeAttribute('hidden');
       app.container.appendChild(card);
       app.visibleCards[resourceId] = card;
+      card.querySelector(".reserve-room-button").addEventListener('click', function() {
+        app.bookRoom(resourceEmail, card);
+      });
     }
 
     card.setAttribute('data-room-type', getRoomType(resourceType));
-    card.querySelector('.location').textContent = resourceName;
+    card.querySelector('.name').textContent = resourceName;
     card.querySelector('.type').textContent = resourceType;
     card.querySelector('.description').textContent = resourceDescription;
-    card.querySelector(".reserve-room-button").addEventListener('click', function() {
-      app.bookRoom(resourceEmail);
-    });
     if (app.isLoading) {
+      app.removeLoading();
+    }
+  };
+
+  app.removeLoading = function() {
       app.spinner.setAttribute('hidden', true);
       app.container.removeAttribute('hidden');
       app.isLoading = false;
-    }
-  };
+  }
 
   /*****************************************************************************
    *
@@ -210,10 +250,13 @@
        if (isSignedIn) {
          app.authorizeButton.style.display = 'none';
          app.signoutButton.style.display = 'block';
+         app.notAuthorizedView.style.display = 'none';
          app.refreshResources();
        } else {
          app.authorizeButton.style.display = 'block';
          app.signoutButton.style.display = 'none';
+         app.notAuthorizedView.style.display = 'block';
+         app.removeLoading();
        }
    }
 

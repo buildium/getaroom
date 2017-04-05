@@ -5,7 +5,7 @@ model.getResources = function(callback) {
         'customer': 'my_customer',
         'maxResults': 50
     }).then(function(response) {
-        
+
         var resources = response.result.items;
         var filteredResources = resources.filter(filterResources);
         console.log('Resources:');
@@ -29,7 +29,7 @@ model.getResources = function(callback) {
     });
 }
 
-model.getAvailableResources = function(callback, timeMin, timeMax) {
+model.getAvailableResources = function(timeMin, timeMax, callback) {
     model.getResources(function(resources) {
         var resourceIds = getResourceIds(resources);
         gapi.client.calendar.freebusy.query({
@@ -37,7 +37,7 @@ model.getAvailableResources = function(callback, timeMin, timeMax) {
           'timeMin': timeMin,
           'timeMax': timeMax
         }).then(function(response) {
-            
+
             var justAvailable = [];
             var calendars = response.result.calendars;
             console.log('Available rooms from:' + timeMin + ' to ' + timeMax);
@@ -57,6 +57,17 @@ model.getAvailableResources = function(callback, timeMin, timeMax) {
                 callback(justAvailable);
             }
         });
+    });
+};
+
+model.getCurrentEvents = function(timeMin, timeMax, callback) {
+    gapi.client.calendar.events.list({
+        'calendarId': 'primary',
+        'timeMin': timeMin,
+        'timeMax': timeMax,
+        'maxResults': 50
+    }).then(function(response) {
+        callback(response.result.items);
     });
 };
 

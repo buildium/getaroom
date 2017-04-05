@@ -19,7 +19,6 @@
 <head>
   <meta charset="utf-8">
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
-  <link rel="canonical" href="https://weather-pwa-sample.firebaseapp.com/final/">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Meeting Rooms</title>
   <link rel="stylesheet" type="text/css" href="styles/inline.css">
@@ -44,22 +43,27 @@
     <button id="2-hour-button">120 Mins</button>
     <button id="butRefresh" class="headerButton" aria-label="Refresh"></button>
     <button id="authorize-button" class="headerLoginButton">Authorize</button>
-    <button id="signout-button" class="headerLoginButton">Sign Out</button>
+    <button id="signout-button" class="headerLoginButton" style="display: none;">Sign Out</button>
 
   </header>
 
   <main class="main">
     <pre id="content"></pre>
-    <div class="empty-view">
-      <h2>No rooms match your criteria.</h2>
-      <h3>Try changing your filters and search again.</h3>
+    <div id="not-authorized-view" class="empty-view">
+        <h2>Not Authorized</h2>
+        <h3>You have not authorized your Google account, or you have authorized an incompatible account.<br>Please authorize the correct Google account in order to view available rooms.</h3>
     </div>
-    <div class="card cardTemplate weather-forecast room" hidden>
-      <div class="city-key room-key" hidden></div>
+    <div id="no-rooms-view" class="empty-view">
+      <h2>Oops...No rooms available</h2>
+      <h3>There are currently no available rooms.<br>Please try changing any filters and search again.</h3>
+    </div>
+    <div class="card cardTemplate room" hidden>
+      <div class="room-key" hidden></div>
       <div class="card-last-updated" hidden></div>
-      <div class="location name"></div>
-      <div class="date type"></div>
+      <div class="name"></div>
+      <div class="type"></div>
       <div class="description"></div>
+      <div class="user-message"></div>
       <button class="reserve-room-button"></button>
     </div>
   </main>

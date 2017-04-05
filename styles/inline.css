@@ -205,7 +205,8 @@ body {
   .empty-view h2 {
     font-size: 2em; }
   .empty-view h3 {
-    font-size: 1.1em; }
+    font-size: 1.1em;
+    line-height: 1.75em; }
 
 .dialog-container {
   background: rgba(0, 0, 0, 0.57);
@@ -305,7 +306,13 @@ body {
   cursor: pointer;
   box-shadow: 0 2px 2px 0 rgba(0, 0, 0, 0.14), 0 3px 1px -2px rgba(0, 0, 0, 0.2), 0 1px 5px 0 rgba(0, 0, 0, 0.12); }
 
+  .room .user-message .success {
+      color: #73B680;
+  }
+
 @media (max-width: 450px) {
+    .room .name, .room .type, .room .description {
+        margin-right: 50px;
   .room .type, .room .description {
     font-size: 0.9em; }
 
