@@ -20,6 +20,8 @@
     isLoading: true,
     visibleCards: {},
     selectedCities: [],
+    notAuthorizedView: document.querySelector('#not-authorized-view'),
+    noRoomsView: document.querySelector('#no-rooms-view'),
     spinner: document.querySelector('.loader'),
     cardTemplate: document.querySelector('.cardTemplate'),
     container: document.querySelector('.main'),
@@ -124,6 +126,12 @@
    }
 
    app.updateResourceCards = function(resources) {
+       if (resources.length > 0) {
+           app.noRoomsView.style.display = 'none';
+       } else {
+           app.noRoomsView.style.display = 'block';
+       }
+
        resources.forEach(function(resource) {
            app.updateResourceCard(resource);
        });
@@ -149,15 +157,19 @@
     }
 
     card.setAttribute('data-room-type', getRoomType(resourceType));
-    card.querySelector('.location').textContent = resourceName;
+    card.querySelector('.name').textContent = resourceName;
     card.querySelector('.type').textContent = resourceType;
     card.querySelector('.description').textContent = resourceDescription;
     if (app.isLoading) {
+      app.removeLoading();
+    }
+  };
+
+  app.removeLoading = function() {
       app.spinner.setAttribute('hidden', true);
       app.container.removeAttribute('hidden');
       app.isLoading = false;
-    }
-  };
+  }
 
   /*****************************************************************************
    *
@@ -217,10 +229,13 @@
        if (isSignedIn) {
          app.authorizeButton.style.display = 'none';
          app.signoutButton.style.display = 'block';
+         app.notAuthorizedView.style.display = 'none';
          app.refreshResources();
        } else {
          app.authorizeButton.style.display = 'block';
          app.signoutButton.style.display = 'none';
+         app.notAuthorizedView.style.display = 'block';
+         app.removeLoading();
        }
    }
 

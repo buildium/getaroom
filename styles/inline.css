@@ -205,7 +205,8 @@ body {
   .empty-view h2 {
     font-size: 2em; }
   .empty-view h3 {
-    font-size: 1.1em; }
+    font-size: 1.1em;
+    line-height: 1.75em; }
 
 .dialog-container {
   background: rgba(0, 0, 0, 0.57);
@@ -310,6 +311,8 @@ body {
   }
 
 @media (max-width: 450px) {
+    .room .name, .room .type, .room .description {
+        margin-right: 50px;
   .room .type, .room .description {
     font-size: 0.9em; }
 
