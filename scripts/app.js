@@ -77,6 +77,10 @@
     app.refreshResources(120);
   });
 
+  document.getElementById('trigger-dropdown').addEventListener('click', function() {
+    document.getElementById('myDropdown').classList.toggle('show');
+  });
+    
 
 
 
@@ -199,7 +203,7 @@
        var now = new Date();
        var timeFromNow = new Date(now.getTime() + minutes*60000);
        console.log(`Time + params: ${timeFromNow}`);
-       model.getAvailableResources(app.updateResourceCards, now, timeFromNow.toISOString());
+       model.getAvailableResources(now, timeFromNow.toISOString(), app.updateResourceCards);
    }
 
 
