@@ -25,6 +25,7 @@
     spinner: document.querySelector('.loader'),
     cardTemplate: document.querySelector('.cardTemplate'),
     container: document.querySelector('.main'),
+    rooms: document.querySelector('.rooms'),
     addDialog: document.querySelector('.dialog-container'),
     authorizeButton: document.getElementById('authorize-button'),
     signoutButton: document.getElementById('signout-button'),
@@ -60,6 +61,10 @@
     // Refresh all of the forecasts
     app.refreshResources();
   });
+
+  app.isSignedIn = function() {
+      return gapi.auth2.getAuthInstance().isSignedIn.get();
+   }
 
 
   /*****************************************************************************
@@ -137,6 +142,27 @@
        });
    }
 
+   app.removeResourceCards = function(resources) {
+      if (resources.length > 0) {
+        resources.forEach(function(resource) {
+           app.removeResourceCard(resource);
+       });
+      }
+   }
+
+   app.removeResourceCard = function(resource) {
+      var resourceId = resource.resourceId;
+      var card = app.visibleCards[resourceId];
+
+      if (!card) {
+        return;
+      }
+
+      card.setAttribute('hidden', true);
+      app.container.removeChild(card);
+      app.visibleCards[resourceId] = null;
+   }
+
   app.updateResourceCard = function(resource) {
     var resourceId = resource.resourceId;
     var resourceEmail = resource.resourceEmail;
@@ -178,6 +204,9 @@
    ****************************************************************************/
 
    app.refreshResources = function() {
+       if (!app.isSignedIn()) {
+        return;
+       }
        var now = new Date();
        var halfHourFromNow = new Date(now.getTime() + 30*60000);
        model.getAvailableResources(now, halfHourFromNow.toISOString(), app.updateResourceCards);
@@ -210,17 +239,18 @@
          discoveryDocs: app.discoveryDocs,
          clientId: app.clientId,
          scope: app.scopes,
-       }).then(function () {
-        // Listen for sign-in state changes.
-        gapi.auth2.getAuthInstance().isSignedIn.listen(app.updateSigninStatus);
-        
+       }).then(function () {       
         // Sign in on init
-        if (!gapi.auth2.getAuthInstance().isSignedIn.get()) {
+        if (!app.isSignedIn()) {
           gapi.auth2.getAuthInstance().signIn();        
         }         
 
          // Handle the initial sign-in state.
-         app.updateSigninStatus(gapi.auth2.getAuthInstance().isSignedIn.get());
+         app.updateSigninStatus(app.isSignedIn());
+
+         // Listen for sign-in state changes.
+         gapi.auth2.getAuthInstance().isSignedIn.listen(app.updateSigninStatus);
+
          app.authorizeButton.onclick = app.handleAuthClick;
          app.signoutButton.onclick = app.handleSignoutClick;
        });
@@ -240,6 +270,8 @@
          app.authorizeButton.style.display = 'block';
          app.signoutButton.style.display = 'none';
          app.notAuthorizedView.style.display = 'block';
+         app.removeResourceCards(app.visibleCards);
+         app.visibleCards = {};
          app.removeLoading();
        }
    }
@@ -256,6 +288,7 @@
    */
    app.handleSignoutClick = function(event) {
        gapi.auth2.getAuthInstance().signOut();
+       app.removeLoading();
    }
 
    /************************************************************************
