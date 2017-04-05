@@ -59,6 +59,24 @@
     app.refreshResources();
   });
 
+  document.getElementById('30-minute-button').addEventListener('click', function() {
+    app.refreshResources(30);
+  });
+
+  document.getElementById('hour-button').addEventListener('click', function() {
+    app.refreshResources(60);
+  });
+
+  document.getElementById('90-minute-button').addEventListener('click', function() {
+    app.refreshResources(90);
+  });
+
+  document.getElementById('2-hour-button').addEventListener('click', function() {
+    app.refreshResources(120);
+  });
+
+
+
 
   /*****************************************************************************
    *
@@ -137,11 +155,14 @@
    *
    ****************************************************************************/
 
-   app.refreshResources = function() {
+   app.refreshResources = function(minutes = 30) {
        var now = new Date();
-       var halfHourFromNow = new Date(now.getTime() + 30*60000);
-       model.getAvailableResources(app.updateResourceCards, now, halfHourFromNow.toISOString());
+       var timeFromNow = new Date(now.getTime() + minutes*60000);
+       console.log(`Time + params: ${timeFromNow}`);
+       model.getAvailableResources(app.updateResourceCards, now, timeFromNow.toISOString());
    }
+
+
 
   /************************************************************************
    *
