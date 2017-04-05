@@ -91,9 +91,37 @@
            calendarId: 'primary',
            resource: event,
        }).then(function(response) {
-           card.querySelector('.user-message').innerHTML = '<span class=\'success\'>Success! Click <a target=_blank href=\'' + response.result.htmlLink + '\'>here</a> to view in calendar</span>';
+           card.querySelector('.user-message').innerHTML = '<span class=\'success\'>Successfully booked room! Click <a target=_blank href=\'' + response.result.htmlLink + '\'>here</a> to view in calendar</span>';
        });
    };
+
+   app.attemptToBookRoom = function(resourceId, card) {
+       var now = new Date();
+       var halfHourFromNow = new Date(now.getTime() + 30*60000);
+       var userAlreadyBookedRoom = false;
+       model.getCurrentEvents(now.toISOString(), halfHourFromNow.toISOString(), function(items) {
+           var userAlreadyBookedRoom = false;
+           if (items.length > 0) {
+               model.getResources(function(resources) {
+                   items.forEach(function(item) {
+                       item.attendees.forEach(function(attendee) {
+                           resources.forEach(function(resource) {
+                               if (resource.resourceEmail === attendee.email) {
+                                   card.querySelector('.user-message').innerHTML = '<span class=\'failure\'>Failed to book room. You already have a booked room during this time.</span>';
+                                   userAlreadyBookedRoom = true;
+                               }
+                           });
+                       });
+                   });
+                   if (!userAlreadyBookedRoom) {
+                       app.bookRoom(resourceId, card);
+                   }
+               });
+           } else {
+               app.bookRoom(resourceId, card);
+           }
+       });
+   }
 
    app.updateResourceCards = function(resources) {
        resources.forEach(function(resource) {
@@ -140,7 +168,7 @@
    app.refreshResources = function() {
        var now = new Date();
        var halfHourFromNow = new Date(now.getTime() + 30*60000);
-       model.getAvailableResources(app.updateResourceCards, now, halfHourFromNow.toISOString());
+       model.getAvailableResources(now, halfHourFromNow.toISOString(), app.updateResourceCards);
    }
 
   /************************************************************************
