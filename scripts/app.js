@@ -28,6 +28,7 @@
     addDialog: document.querySelector('.dialog-container'),
     authorizeButton: document.getElementById('authorize-button'),
     signoutButton: document.getElementById('signout-button'),
+    filterList: document.querySelector('.filter-list'),
     googleApi: document.getElementById('google-api'),
     daysOfWeek: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'],
     clientId: config.CLIENT_ID,
@@ -59,6 +60,14 @@
   document.getElementById('butRefresh').addEventListener('click', function() {
     // Refresh all of the forecasts
     app.refreshResources();
+  });
+
+  document.getElementById('butFilter').addEventListener('click', function() {
+     if(app.filterList.style.display == 'block') {
+         app.filterList.style.display = 'none'
+     } else {
+         app.filterList.style.display = 'block'
+     }
   });
 
 
@@ -94,6 +103,7 @@
            resource: event,
        }).then(function(response) {
            card.querySelector('.user-message').innerHTML = '<span class=\'success\'>Successfully booked room! Click <a target=_blank href=\'' + response.result.htmlLink + '\'>here</a> to view in calendar</span>';
+           card.querySelector('.reserve-room-button').classList.add('reserved');
        });
    };
 
@@ -110,6 +120,7 @@
                            resources.forEach(function(resource) {
                                if (resource.resourceEmail === attendee.email) {
                                    card.querySelector('.user-message').innerHTML = '<span class=\'failure\'>Failed to book room. You already have a booked room during this time.</span>';
+                                   card.querySelector('.reserve-room-button').classList.remove('reserved');
                                    userAlreadyBookedRoom = true;
                                }
                            });
@@ -213,11 +224,11 @@
        }).then(function () {
         // Listen for sign-in state changes.
         gapi.auth2.getAuthInstance().isSignedIn.listen(app.updateSigninStatus);
-        
+
         // Sign in on init
         if (!gapi.auth2.getAuthInstance().isSignedIn.get()) {
-          gapi.auth2.getAuthInstance().signIn();        
-        }         
+          gapi.auth2.getAuthInstance().signIn();
+        }
 
          // Handle the initial sign-in state.
          app.updateSigninStatus(gapi.auth2.getAuthInstance().isSignedIn.get());

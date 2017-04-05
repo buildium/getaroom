@@ -116,8 +116,51 @@ body {
       cursor: pointer; }
   .header #butRefresh {
     background: url(/images/ic_refresh_white_24px.svg) center center no-repeat; }
-  .header #butAdd {
+  .header #butFilter {
     background: url(/images/ic_filter_list_white_24px.svg) center center no-repeat; }
+    .header .filter-list {
+        position: absolute;
+        right: 0;
+        top: 56px;
+        background-color: white;
+        box-shadow: 0 4px 5px 0 rgba(0, 0, 0, 0.14), 0 2px 9px 1px rgba(0, 0, 0, 0.12), 0 4px 2px -2px rgba(0, 0, 0, 0.2);
+        text-align: center; }
+    .header .filter-list ul {
+        color: black;
+        list-style-type: none;
+        padding: 0 20px;
+        margin-bottom: 10px;
+        text-align: left;
+        float: left; }
+    .header .filter-list ul p {
+        margin: 0 0 10px;
+        font-size: 0.8em;
+        font-weight: bold; }
+    .header .filter-list ul li {
+        margin-bottom: 10px;
+        font-size: 0.7em;
+        float: left;
+        clear: both; }
+    .header .filter-list ul li input {
+        float: left;
+        clear: both;
+        margin: 0 10px 0 0;
+        width: 20px;
+        height: 20px; }
+    .header .filter-list ul li span {
+        float: left;
+        margin-top: 2px; }
+    .header #apply-filters-button {
+        padding: 15px 50px;
+        margin: 10px 0 20px;
+        background: transparent;
+        border: 0;
+        background-color: #73b680;
+        border-radius: 4px;
+        color: white;
+        text-transform: uppercase;
+        font-weight: bold;
+        cursor: pointer; }
 
 .header__title {
   font-weight: 400;
@@ -296,7 +339,7 @@ body {
 
 .room .reserve-room-button {
   background: url(/images/ic_add_white_24px.svg) center center no-repeat;
-  background-color: #73b680;
+  background-color: #39404F;
   border: none;
   border-radius: 50%;
   padding: 20px;
@@ -305,6 +348,9 @@ body {
   bottom: 15px;
   cursor: pointer;
   box-shadow: 0 2px 2px 0 rgba(0, 0, 0, 0.14), 0 3px 1px -2px rgba(0, 0, 0, 0.2), 0 1px 5px 0 rgba(0, 0, 0, 0.12); }
+  .room .reserve-room-button.reserved {
+      background: url(/images/ic_check_white_24px.svg) center center no-repeat;
+      background-color: #73b680; }
 
   .room .user-message .success {
       color: #73B680;
