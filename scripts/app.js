@@ -24,7 +24,7 @@
     noRoomsView: document.querySelector('#no-rooms-view'),
     spinner: document.querySelector('.loader'),
     cardTemplate: document.querySelector('.cardTemplate'),
-    container: document.querySelector('.main'),
+    container: document.querySelector('.main .room-cards'),
     addDialog: document.querySelector('.dialog-container'),
     authorizeButton: document.getElementById('authorize-button'),
     signoutButton: document.getElementById('signout-button'),
@@ -125,6 +125,28 @@
        });
    }
 
+   app.getUsersCurrentResources = function(callback) {
+       var now = new Date();
+       var halfHourFromNow = new Date(now.getTime() + 30*60000);
+       var currentResources = [];
+       model.getCurrentEvents(now.toISOString(), halfHourFromNow.toISOString(), function(items) {
+           model.getResources(function(resources) {
+               resources.forEach(function(resource) {
+                   items.forEach(function(item) {
+                       item.attendees.forEach(function(attendee) {
+                           if (attendee.email === resource.resourceEmail) {
+                               resource.isBooked = true;
+                               resource.eventLink = item.htmlLink;
+                               currentResources.push(resource);
+                           }
+                       });
+                   });
+               });
+               callback(currentResources);
+           });
+       });
+   }
+
    app.updateResourceCards = function(resources) {
        if (resources.length > 0) {
            app.noRoomsView.style.display = 'none';
@@ -151,9 +173,15 @@
       card.removeAttribute('hidden');
       app.container.appendChild(card);
       app.visibleCards[resourceId] = card;
-      card.querySelector(".reserve-room-button").addEventListener('click', function() {
-        app.bookRoom(resourceEmail, card);
-      });
+      var actionButton = card.querySelector(".room .user-action");
+      if (resource.isBooked) {
+          var calendarLink = resource.eventLink ? resource.eventLink : 'calendar.google.com';
+          actionButton.innerHTML = '<a class=\'gcalendar-link\' target=\'_blank\' href=\'' + calendarLink +'\'><img src=\'../images/gcalendar.png\'></a>';
+      } else {
+            card.querySelector(".reserve-room-button").addEventListener('click', function() {
+            app.bookRoom(resourceEmail, card);
+          });
+      }
     }
 
     card.setAttribute('data-room-type', getRoomType(resourceType));
@@ -180,7 +208,16 @@
    app.refreshResources = function() {
        var now = new Date();
        var halfHourFromNow = new Date(now.getTime() + 30*60000);
-       model.getAvailableResources(now, halfHourFromNow.toISOString(), app.updateResourceCards);
+       clearCards();
+       app.getUsersCurrentResources(function(resources) {
+           app.updateResourceCards(resources); //set user's resources if any
+           model.getAvailableResources(now, halfHourFromNow.toISOString(), app.updateResourceCards);//set available resources
+       })
+   }
+
+   var clearCards = function() {
+       app.container.innerHTML = '';
+       app.visibleCards = {};
    }
 
   /************************************************************************
