@@ -108,7 +108,7 @@
            calendarId: 'primary',
            resource: event,
        }).then(function(response) {
-           card.querySelector('.user-message').innerHTML = '<span class=\'success\'>Successfully booked room! Click <a target=_blank href=\'' + response.result.htmlLink + '\'>here</a> to view in calendar</span>';
+           card.querySelector('.user-message').innerHTML = '<span class=\'success\'><a target=_blank href=\'' + response.result.htmlLink + '\'>View in calendar</a></span>';
            card.querySelector('.reserve-room-button').classList.add('reserved');
        });
    };
@@ -274,11 +274,11 @@
          discoveryDocs: app.discoveryDocs,
          clientId: app.clientId,
          scope: app.scopes,
-       }).then(function () {       
+       }).then(function () {
         // Sign in on init
         if (!app.isSignedIn()) {
-          gapi.auth2.getAuthInstance().signIn();        
-        }         
+          gapi.auth2.getAuthInstance().signIn();
+        }
 
          // Handle the initial sign-in state.
          app.updateSigninStatus(app.isSignedIn());
@@ -310,7 +310,7 @@
          app.removeLoading();
        }
    }
-   
+
    app.toastUserGreeting = function() {
        var email = gapi.auth2.getAuthInstance().currentUser.get().getBasicProfile().getEmail();
        toast('Hi, ' + email + '!');
