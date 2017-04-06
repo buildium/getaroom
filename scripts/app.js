@@ -83,6 +83,12 @@
   document.getElementById('filter-cancel-button').addEventListener('click', function() {
      app.toggleFilterDropdown();
   });
+  
+  document.addEventListener("visibilitychange", function() {
+      if (!document.hidden) {
+          app.refreshResources();
+      }
+  });
 
   /*****************************************************************************
    *
