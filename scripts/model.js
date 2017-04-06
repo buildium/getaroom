@@ -65,7 +65,8 @@ model.getCurrentEvents = function(timeMin, timeMax, callback) {
         'calendarId': 'primary',
         'timeMin': timeMin,
         'timeMax': timeMax,
-        'maxResults': 50
+        'maxResults': 50,
+        'singleEvents': true
     }).then(function(response) {
         callback(response.result.items);
     });
