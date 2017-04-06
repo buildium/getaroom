@@ -392,7 +392,7 @@ body {
   font-size: 1.5em;
 }
 
-.room .type, .room .description {
+.room .type, .room .meeting-time, .room .description {
   margin-top: 6px;
 }
 
@@ -402,7 +402,7 @@ body {
 
 .room .meeting-time {
     color: #FBB03B;
-    font-size: 1em;
+    font-size: 0.75em;
 }
 
 .room .description {
