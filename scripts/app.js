@@ -75,10 +75,6 @@
      app.toggleFilterDropdown();
     });
 
-    document.getElementById('apply-filters-button').addEventListener('click', function() {
-      var minutes = parseInt(document.getElementById('time-value').value);
-      app.refreshResources(minutes);
-    })
   document.getElementById('apply-filters-button').addEventListener('click', function() {
      app.applyFilters();
   });
@@ -321,7 +317,8 @@
            app.selectedSizes.push(sizeFilters[i].value);
        }
 
-       app.refreshResources();
+       var meetingDuration = parseInt(document.getElementById('time-value').value)
+       app.refreshResources(meetingDuration);
    }
 
 
