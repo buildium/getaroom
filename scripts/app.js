@@ -80,6 +80,10 @@
      app.toggleFilterDropdown();
   });
 
+  document.getElementById('filter-cancel-button').addEventListener('click', function() {
+     app.toggleFilterDropdown();
+  });
+
   /*****************************************************************************
    *
    * Methods to update/refresh the UI
