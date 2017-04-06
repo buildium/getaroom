@@ -87,7 +87,9 @@
 
    app.bookRoom = function(resourceId, card) {
        var now = new Date();
-       var halfHourFromNow = new Date(now.getTime() + 30*60000);
+       var timeFilterValue = parseInt(document.getElementById('time-value').value);
+       var meetingEnd = new Date(now.getTime() + timeFilterValue*60000);
+debugger;
        var event = {
          'summary': 'My Booked Room',
          'description': 'An event booked through the meeting room service',
@@ -96,7 +98,7 @@
            'timeZone': 'America/New_York',
          },
          'end': {
-           'dateTime': halfHourFromNow,
+           'dateTime': meetingEnd,
            'timeZone': 'America/New_York',
          },
          'attendees': [
@@ -114,37 +116,6 @@
            card.querySelector('.reserve-room-button').classList.add('reserved');
        });
    };
-
-   app.attemptToBookRoom = function(resourceId, card) {
-       var now = new Date();
-       var halfHourFromNow = new Date(now.getTime() + 30*60000);
-       var userAlreadyBookedRoom = false;
-       model.getCurrentEvents(now.toISOString(), halfHourFromNow.toISOString(), function(items) {
-           var userAlreadyBookedRoom = false;
-           if (items.length > 0) {
-               model.getResources(function(resources) {
-                   items.forEach(function(item) {
-                       if (item.attendees) {
-                         item.attendees.forEach(function(attendee) {
-                             resources.forEach(function(resource) {
-                                 if (resource.resourceEmail === attendee.email) {
-                                     card.querySelector('.user-message').innerHTML = '<span class=\'failure\'>Failed to book room. You already have a booked room during this time.</span>';
-                                     card.querySelector('.reserve-room-button').classList.remove('reserved');
-                                     userAlreadyBookedRoom = true;
-                                 }
-                             });
-                         });
-                      }
-                   });
-                   if (!userAlreadyBookedRoom) {
-                       app.bookRoom(resourceId, card);
-                   }
-               });
-           } else {
-               app.bookRoom(resourceId, card);
-           }
-       });
-   }
 
    app.getUsersCurrentResources = function(minutes, callback) {
        var now = new Date();
@@ -317,7 +288,7 @@
            app.selectedSizes.push(sizeFilters[i].value);
        }
 
-       var meetingDuration = parseInt(document.getElementById('time-value').value)
+       var meetingDuration = parseInt(document.getElementById('time-value').value);
        app.refreshResources(meetingDuration);
    }
 
