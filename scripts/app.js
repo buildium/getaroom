@@ -67,10 +67,6 @@
   app.isSignedIn = function() {
       return gapi.auth2.getAuthInstance().isSignedIn.get();
    }
-   
-  document.getElementById('30-minute-button').addEventListener('click', function() {
-    app.refreshResources(30);
-  });
 
   document.getElementById('butFilter').addEventListener('click', function() {
      if(app.filterList.style.display == 'block') {
@@ -80,13 +76,18 @@
      }
     });
 
+  document.getElementById('30-minute-button').addEventListener('click', function() {
+      app.refreshResources(30);
+    });
+
   document.getElementById('hour-button').addEventListener('click', function() {
     app.refreshResources(60);
   });
 
   document.getElementById('90-minute-button').addEventListener('click', function() {
     app.refreshResources(90);
-    
+    });
+
   document.getElementById('2-hour-button').addEventListener('click', function() {
     app.refreshResources(120);
   });
@@ -165,11 +166,11 @@
        });
    }
 
-   app.getUsersCurrentResources = function(callback) {
+   app.getUsersCurrentResources = function(minutes, callback) {
        var now = new Date();
-       var halfHourFromNow = new Date(now.getTime() + 30*60000);
+       var timeFromNow = new Date(now.getTime() + minutes*60000);
        var currentResources = [];
-       model.getCurrentEvents(now.toISOString(), halfHourFromNow.toISOString(), function(items) {
+       model.getCurrentEvents(now.toISOString(), timeFromNow.toISOString(), function(items) {
            model.getResources(function(resources) {
                resources.forEach(function(resource) {
                    items.forEach(function(item) {
@@ -254,11 +255,11 @@
        var now = new Date();
        var timeFromNow = new Date(now.getTime() + minutes*60000);
        clearCards();
-       app.getUsersCurrentResources(function(resources) {
+       app.getUsersCurrentResources(minutes, function(resources) {
+
           if (resources && resources.length > 0) {
            app.updateResourceCards(resources); //set user's resources if any
           }
-          
            model.getAvailableResources(now, timeFromNow.toISOString(), app.updateResourceCards);//set available resources
        })
    }
@@ -297,11 +298,11 @@
          discoveryDocs: app.discoveryDocs,
          clientId: app.clientId,
          scope: app.scopes,
-       }).then(function () {       
+       }).then(function () {
         // Sign in on init
         if (!app.isSignedIn()) {
-          gapi.auth2.getAuthInstance().signIn();        
-        }         
+          gapi.auth2.getAuthInstance().signIn();
+        }
 
          // Handle the initial sign-in state.
          app.updateSigninStatus(app.isSignedIn());
@@ -333,7 +334,7 @@
          app.removeLoading();
        }
    }
-   
+
    app.toastUserGreeting = function() {
        var email = gapi.auth2.getAuthInstance().currentUser.get().getBasicProfile().getEmail();
        toast('Hi, ' + email + '!');
