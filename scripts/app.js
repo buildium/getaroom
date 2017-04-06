@@ -101,6 +101,8 @@
        var now = new Date();
        var timeFilterValue = parseInt(document.getElementById('time-value').value);
        var meetingEnd = new Date(now.getTime() + timeFilterValue*60000);
+       var approxMeetingEnd = new Date(now.getTime() + timeFilterValue*60000);
+       var meetingEnd = getTimeUpperLimit(approxMeetingEnd);
 
        var event = {
          'summary': 'My Booked Room',
@@ -132,6 +134,27 @@
            card.querySelector('.meeting-time').textContent =  startTime + ' - ' + endTime;
        });
    };
+
+   var getTimeUpperLimit = function(date) {
+       var dateWrapper = moment(date);
+       dateWrapper.seconds(0);
+       if (dateWrapper.minutes() === 0) {
+           return dateWrapper;
+       }
+       if (dateWrapper.minutes() < 15) {
+           dateWrapper.minutes(15);
+           return dateWrapper;
+       } else if (dateWrapper.minutes() < 30) {
+           dateWrapper.minutes(30);
+           return dateWrapper;
+       } else if (dateWrapper.minutes() < 45) {
+           dateWrapper.minutes(45);
+           return dateWrapper;
+       } else if (dateWrapper.minutes() < 60) {
+           dateWrapper.add(1, 'hours');
+           return dateWrapper;
+       }
+   }
 
    app.getUsersCurrentResources = function(minutes, callback) {
        var now = new Date();

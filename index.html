@@ -50,25 +50,25 @@
         <div class="filter-checkbox-container">
             <ul>
                 <p>Types</p>
-                <li><input class="type-filter" type="checkbox" name="room-type" value="conference room"><span>Conference Rooms</span></li>
-                <li><input class="type-filter" type="checkbox" name="room-type" value="focus room"><span>Focus Rooms</span></li>
-                <li><input class="type-filter" type="checkbox" name="room-type" value="boardroom"><span>Boardroom</span></li>
-                <li><input class="type-filter" type="checkbox" name="room-type" value="webinar"><span>Webinar</span></li>
+                <li><input class="type-filter" type="checkbox" id="room-type-conference" value="conference room"><label for="room-type-conference">Conference Rooms</label></li>
+                <li><input class="type-filter" type="checkbox" id="room-type-focus" value="focus room"><label for="room-type-focus">Focus Rooms</label></li>
+                <li><input class="type-filter" type="checkbox" id="room-type-board" value="boardroom"><label for="room-type-board">Boardroom</label></li>
+                <li><input class="type-filter" type="checkbox" id="room-type-webinar" value="webinar"><label for="room-type-webinar">Webinar</label></li>
             </ul>
             <ul>
                 <p>Features</p>
-                <li><input class="feature-filter" type="checkbox" name="room-feature" value="mac mini"><span>Mac Mini</span></li>
-                <li><input class="feature-filter" type="checkbox" name="room-feature" value="monitor"><span>Monitor</span></li>
-                <li><input class="feature-filter" type="checkbox" name="room-feature" value="camera"><span>Camera</span></li>
-                <li><input class="feature-filter" type="checkbox" name="room-feature" value="mic"><span>Mic</span></li>
+                <li><input class="feature-filter" type="checkbox" id="room-feature-mac-mini" value="mac mini"><label for="room-feature-mac-mini">Mac Mini</label></li>
+                <li><input class="feature-filter" type="checkbox" id="room-feature-monitor" value="monitor"><label for="room-feature-monitor">Monitor</label></li>
+                <li><input class="feature-filter" type="checkbox" id="room-feature-camera" value="camera"><label for="room-feature-camera">Camera</label></li>
+                <li><input class="feature-filter" type="checkbox" id="room-feature-mic" value="mic"><label for="room-feature-mic">Mic</label></li>
             </ul>
             <ul>
                 <p>Size</p>
-                <li><input class="size-filter" type="checkbox" name="room-size" value="1-2 people"><span>1-2 People</span></li>
-                <li><input class="size-filter" type="checkbox" name="room-size" value="4 people"><span>4 People</span></li>
-                <li><input class="size-filter" type="checkbox" name="room-size" value="6 people"><span>6 People</span></li>
-                <li><input class="size-filter" type="checkbox" name="room-size" value="8 people"><span>8 People</span></li>
-                <li><input class="size-filter" type="checkbox" name="room-size" value="12 people"><span>12 People</span></li>
+                <li><input class="size-filter" type="checkbox" id="room-size-2" value="1-2 people"><label for="room-size-2">1-2 People</label></li>
+                <li><input class="size-filter" type="checkbox" id="room-size-4" value="4 people"><label for="room-size-4">4 People</label></li>
+                <li><input class="size-filter" type="checkbox" id="room-size-6" value="6 people"><label for="room-size-6">6 People</label></li>
+                <li><input class="size-filter" type="checkbox" id="room-size-8" value="8 people"><label for="room-size-8">8 People</label></li>
+                <li><input class="size-filter" type="checkbox" id="room-size-18" value="12 people"><label for="room-size-12">12 People</label></li>
             </ul>
         </div>
 
@@ -119,6 +119,7 @@
   <script src="scripts/toast.js?version=REPLACE_VERSION" async></script>
   <script src="scripts/app.js?version=REPLACE_VERSION" async></script>
   <script id='google-api' async defer src="https://apis.google.com/js/api.js"></script>
+  <script src="../lib/moment.min.js"></script>
 
 </body>
 </html>

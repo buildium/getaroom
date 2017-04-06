@@ -25,7 +25,7 @@ var filesToCache = [
   '/images/ic_add_white_24px.svg',
   '/images/ic_filter_list_white_24px.svg',
   '/images/ic_refresh_white_24px.svg',
-  'images/ic_schedule_white_24px'
+  '/images/ic_schedule_white_24px.svg'
 ];
 
 self.addEventListener('install', function(e) {

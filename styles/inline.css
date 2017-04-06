@@ -175,12 +175,20 @@ body {
         font-size: 0.7em;
         float: left;
         clear: both; }
-    .header .filter-list ul li input {
+    .header .filter-list ul li input[type="checkbox"] {
+        display: none;
         float: left;
         clear: both;
         margin: 0 10px 0 0;
         width: 20px;
         height: 20px; }
+    .header .filter-list ul li input[type="checkbox"] + label {
+        background: url(/images/ic_check_box_outline_blank_black_24px.svg) no-repeat;
+        height: 23px;
+        display: inline-block;
+        padding: 4px 0 0 28px; }
+    .header .filter-list ul li input[type="checkbox"]:checked + label {
+        background: url(/images/ic_check_box_black_24px.svg) no-repeat; }
     .header .filter-list ul li span {
         float: left;
         margin-top: 2px; }
