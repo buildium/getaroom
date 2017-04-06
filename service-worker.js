@@ -12,16 +12,16 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-var dataCacheName = 'dataCache-v1';
-var fileCacheName = 'fileCache-v1';
+var dataCacheName = 'dataCache-REPLACE_VERSION';
+var fileCacheName = 'fileCache-REPLACE_VERSION';
 var filesToCache = [
   '/',
   '/index.html',
-  '/config.js',
-  '/scripts/model.js',
-  '/scripts/toast.js',
-  '/scripts/app.js',
-  '/styles/inline.css',
+  '/config.js?version=REPLACE_VERSION',
+  '/scripts/model.js?version=REPLACE_VERSION',
+  '/scripts/toast.js?version=REPLACE_VERSION',
+  '/scripts/app.js?version=REPLACE_VERSION',
+  '/styles/inline.css?version=REPLACE_VERSION',
   '/images/ic_add_white_24px.svg',
   '/images/ic_filter_list_white_24px.svg',
   '/images/ic_refresh_white_24px.svg',
