@@ -145,13 +145,15 @@ body {
         margin-left: 5%;
         border-bottom: 1px;
     }
+    .header .filter-list .filter-checkbox-container {
+        text-align: left; }
     .header .filter-list ul {
         list-style-type: none;
         padding: 0 20px;
         margin-top: 5px;
         margin-bottom: 10px;
         text-align: left;
-        float: left; }
+        display: inline-block; }
     .header .filter-list ul p {
         margin: 0 0 10px;
         font-size: 0.8em;

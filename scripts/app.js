@@ -20,6 +20,9 @@
     isLoading: true,
     visibleCards: {},
     selectedCities: [],
+    selectedRoomTypes: [],
+    selectedFeatures: [],
+    selectedSizes: [],
     notAuthorizedView: document.querySelector('#not-authorized-view'),
     noRoomsView: document.querySelector('#no-rooms-view'),
     spinner: document.querySelector('.loader'),
@@ -69,17 +72,17 @@
    }
 
   document.getElementById('butFilter').addEventListener('click', function() {
-     if(app.filterList.style.display == 'block') {
-         app.filterList.style.display = 'none'
-     } else {
-         app.filterList.style.display = 'block'
-     }
+     app.toggleFilterDropdown();
     });
 
     document.getElementById('apply-filters-button').addEventListener('click', function() {
       var minutes = parseInt(document.getElementById('time-value').value);
       app.refreshResources(minutes);
     })
+  document.getElementById('apply-filters-button').addEventListener('click', function() {
+     app.applyFilters();
+  });
+
   /*****************************************************************************
    *
    * Methods to update/refresh the UI
@@ -172,15 +175,57 @@
    }
 
    app.updateResourceCards = function(resources) {
-       if (resources.length > 0) {
+       var filteredResources = app.filterResources(resources);
+       if (filteredResources.length > 0) {
            app.noRoomsView.style.display = 'none';
        } else {
            app.noRoomsView.style.display = 'block';
+           app.removeLoading();
        }
 
-       resources.forEach(function(resource) {
+       filteredResources.forEach(function(resource) {
            app.updateResourceCard(resource);
        });
+   }
+
+   app.filterResources = function(resources) {
+       var filteredResources = [];
+       resources.forEach(function(resource) {
+           if (app.shouldShowResource(resource)) {
+               filteredResources.push(resource);
+           }
+       });
+       return filteredResources;
+   }
+
+   app.shouldShowResource = function(resource) {
+       var resourceType = resource.resourceType.toLowerCase();
+       var resourceDescription = resource.resourceDescription;
+       if (typeof resource.resourceDescription != 'undefined') {
+           resourceDescription = resourceDescription.toLowerCase();
+       }
+       var hasRoomType = app.selectedRoomTypes.length == 0 ? true : false;
+       app.selectedRoomTypes.forEach(function(type) {
+          if (resourceType.indexOf(type) != -1) {
+              hasRoomType = true;
+          }
+       });
+
+       var hasFeatures = true;
+       app.selectedFeatures.forEach(function(feature) {
+           if (typeof resourceDescription == 'undefined' || resourceDescription.indexOf(feature) == -1) {
+               hasFeatures = false;
+           }
+       });
+
+       var hasSize = app.selectedSizes.length == 0 ? true : false;
+       app.selectedSizes.forEach(function(size) {
+           if (typeof resourceDescription != 'undefined' && resourceDescription.indexOf(size) != -1) {
+               hasSize = true;
+           }
+       });
+
+       return hasRoomType && hasFeatures && hasSize;
    }
 
   app.updateResourceCard = function(resource) {
@@ -217,11 +262,68 @@
     }
   };
 
+  app.showLoading = function() {
+      app.spinner.removeAttribute('hidden');
+      app.container.setAttribute('hidden', true);
+      app.isLoading = true;
+  }
+
   app.removeLoading = function() {
       app.spinner.setAttribute('hidden', true);
       app.container.removeAttribute('hidden');
       app.isLoading = false;
   }
+
+
+  /*****************************************************************************
+   *
+   * Methods for filtering
+   *
+   ****************************************************************************/
+   app.toggleFilterDropdown = function() {
+       if(app.filterList.style.display == 'block') {
+           app.filterList.style.display = 'none';
+           var typeFilters = document.querySelectorAll('.type-filter'), i;
+           for (i = 0; i < typeFilters.length; i++) {
+               typeFilters[i].checked = app.selectedRoomTypes.indexOf(typeFilters[i].value) != -1;
+           }
+
+           var featureFilters = document.querySelectorAll('.feature-filter'), i;
+           for (i = 0; i < featureFilters.length; i++) {
+               featureFilters[i].checked = app.selectedFeatures.indexOf(featureFilters[i].value) != -1;
+           }
+
+           var sizeFilters = document.querySelectorAll('.size-filter'), i;
+           for (i = 0; i < sizeFilters.length; i++) {
+               sizeFilters[i].checked = app.selectedSizes.indexOf(sizeFilters[i].value) != -1;
+           }
+       } else {
+           app.filterList.style.display = 'block';
+       }
+   }
+
+   app.applyFilters = function() {
+       app.selectedRoomTypes = [];
+       var typeFilters = document.querySelectorAll('.type-filter:checked'), i;
+       for (i = 0; i < typeFilters.length; i++) {
+           app.selectedRoomTypes.push(typeFilters[i].value);
+       }
+
+       app.selectedFeatures = [];
+       var featureFilters = document.querySelectorAll('.feature-filter:checked'), i;
+       for (i = 0; i < featureFilters.length; i++) {
+           app.selectedFeatures.push(featureFilters[i].value);
+       }
+
+       app.selectedSizes = [];
+       var sizeFilters = document.querySelectorAll('.size-filter:checked'), i;
+       for (i = 0; i < sizeFilters.length; i++) {
+           app.selectedSizes.push(sizeFilters[i].value);
+       }
+
+       app.refreshResources();
+   }
+
 
   /*****************************************************************************
    *
@@ -236,6 +338,7 @@
        var now = new Date();
        var timeFromNow = new Date(now.getTime() + minutes*60000);
        clearCards();
+       app.showLoading();
        app.getUsersCurrentResources(minutes, function(resources) {
 
           if (resources && resources.length > 0) {
