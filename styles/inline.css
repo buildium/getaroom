@@ -134,6 +134,9 @@ body {
         text-decoration: none;
         text-shadow: 0 1px 0 #fff;
         top: 5px;
+        background: url(/images/ic_close_black_24px.svg) center center no-repeat;
+        padding: 15px;
+        cursor: pointer;
     }
     .header .filter-list p {
         margin: 10px 0 10px;
