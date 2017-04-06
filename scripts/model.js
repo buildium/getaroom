@@ -8,22 +8,17 @@ model.getResources = function(callback) {
 
         var resources = response.result.items;
         var filteredResources = resources.filter(filterResources);
-        console.log('Resources:');
-
         var justResources = [];
         if (resources.length > 0) {
             var groupedResources = groupBy(filteredResources, 'resourceType');
             for(var resourceKey in groupedResources) {
-                console.log(resourceKey + ':');
                 for(var resourceIndex in groupedResources[resourceKey]) {
                     var resource = groupedResources[resourceKey][resourceIndex]
-                    console.log(resource.resourceName + ' - ' + resource.resourceEmail);
                     justResources.push(resource);
                 }
             }
             callback(justResources);
         } else {
-            console.log('No resources found.');
             callback(justResources);
         }
     });
@@ -40,7 +35,6 @@ model.getAvailableResources = function(timeMin, timeMax, callback) {
 
             var justAvailable = [];
             var calendars = response.result.calendars;
-            console.log('Available rooms from:' + timeMin + ' to ' + timeMax);
             if (calendars) {
                 var groupedResources = groupBy(resources, 'resourceEmail');
                 for (var r in calendars) {
@@ -48,7 +42,6 @@ model.getAvailableResources = function(timeMin, timeMax, callback) {
                     var busy = resource.busy;
                     var errors = resource.errors;
                     if (!errors && busy && busy.length === 0) {
-                        console.log(r);
                         justAvailable.push(groupedResources[r][0]);
                     }
                 }
