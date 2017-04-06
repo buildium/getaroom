@@ -83,6 +83,13 @@
   document.getElementById('filter-cancel-button').addEventListener('click', function() {
      app.toggleFilterDropdown();
   });
+  
+  document.addEventListener("visibilitychange", function() {
+      if (!document.hidden) {
+          app.refreshResources();
+      }
+  });
+
 
   /*****************************************************************************
    *
@@ -93,8 +100,8 @@
    app.bookRoom = function(resourceId, card) {
        var now = new Date();
        var timeFilterValue = parseInt(document.getElementById('time-value').value);
-       var meetingEnd = new Date(now.getTime() + timeFilterValue*60000);
-debugger;
+       var approxMeetingEnd = new Date(now.getTime() + timeFilterValue*60000);
+       var meetingEnd = getTimeUpperLimit(approxMeetingEnd);
        var event = {
          'summary': 'My Booked Room',
          'description': 'An event booked through the meeting room service',
@@ -119,8 +126,32 @@ debugger;
        }).then(function(response) {
            card.querySelector('.user-message').innerHTML = '<span class=\'success\'><a target=_blank href=\'' + response.result.htmlLink + '\'>View in calendar</a></span>';
            card.querySelector('.reserve-room-button').classList.add('reserved');
+           var startTime = formatDateTime(response.result.start);
+           var endTime = formatDateTime(response.result.end);
+           card.querySelector('.meeting-time').textContent =  startTime + ' - ' + endTime;
        });
    };
+
+   var getTimeUpperLimit = function(date) {
+       var dateWrapper = moment(date);
+       dateWrapper.seconds(0);
+       if (dateWrapper.minutes() === 0) {
+           return dateWrapper;
+       }
+       if (dateWrapper.minutes() < 15) {
+           dateWrapper.minutes(15);
+           return dateWrapper;
+       } else if (dateWrapper.minutes() < 30) {
+           dateWrapper.minutes(30);
+           return dateWrapper;
+       } else if (dateWrapper.minutes() < 45) {
+           dateWrapper.minutes(45);
+           return dateWrapper;
+       } else if (dateWrapper.minutes() < 60) {
+           dateWrapper.add(1, 'hours');
+           return dateWrapper;
+       }
+   }
 
    app.getUsersCurrentResources = function(minutes, callback) {
        var now = new Date();
@@ -135,6 +166,8 @@ debugger;
                            if (attendee.email === resource.resourceEmail) {
                                resource.isBooked = true;
                                resource.eventLink = item.htmlLink;
+                               resource.start = item.start;
+                               resource.end = item.end;
                                currentResources.push(resource);
                            }
                        });
@@ -218,6 +251,9 @@ debugger;
       if (resource.isBooked) {
           var calendarLink = resource.eventLink ? resource.eventLink : 'calendar.google.com';
           actionButton.innerHTML = '<a class=\'gcalendar-link\' target=\'_blank\' href=\'' + calendarLink +'\'><img src=\'../images/gcalendar.png\'></a>';
+           var startTime = formatDateTime(resource.start);
+           var endTime = formatDateTime(resource.end);
+           card.querySelector('.meeting-time').textContent =  startTime + ' - ' + endTime;
       } else {
             card.querySelector(".reserve-room-button").addEventListener('click', function() {
             app.bookRoom(resourceEmail, card);
@@ -233,6 +269,7 @@ debugger;
       app.removeLoading();
     }
   };
+
 
   app.showLoading = function() {
       app.spinner.removeAttribute('hidden');
@@ -327,6 +364,15 @@ debugger;
    }
 
 
+  var formatDateTime = function(dateAndTimezone) {
+    //weekday: "short", year: "numeric", month: "short",  
+      //day: "numeric", 
+    var options = {  
+      hour: "2-digit", minute: "2-digit"  
+    };  
+    var dateTime = new Date(dateAndTimezone.dateTime); 
+    return dateTime.toLocaleTimeString('en-us', options);
+  }
 
   /************************************************************************
    *

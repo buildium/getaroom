@@ -400,12 +400,17 @@ body {
   font-size: 1.5em;
 }
 
-.room .type, .room .description {
+.room .type, .room .meeting-time, .room .description {
   margin-top: 6px;
 }
 
 .room .type {
   font-size: 1.1em;
+}
+
+.room .meeting-time {
+    color: #FBB03B;
+    font-size: 0.75em;
 }
 
 .room .description {
