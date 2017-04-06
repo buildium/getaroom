@@ -101,7 +101,7 @@
        var now = new Date();
        var timeFilterValue = parseInt(document.getElementById('time-value').value);
        var meetingEnd = new Date(now.getTime() + timeFilterValue*60000);
-debugger;
+
        var event = {
          'summary': 'My Booked Room',
          'description': 'An event booked through the meeting room service',
@@ -126,6 +126,7 @@ debugger;
        }).then(function(response) {
            card.querySelector('.user-message').innerHTML = '<span class=\'success\'><a target=_blank href=\'' + response.result.htmlLink + '\'>View in calendar</a></span>';
            card.querySelector('.reserve-room-button').classList.add('reserved');
+           card.querySelector('.reserve-room-button').disabled = true;
            var startTime = formatDateTime(response.result.start);
            var endTime = formatDateTime(response.result.end);
            card.querySelector('.meeting-time').textContent =  startTime + ' - ' + endTime;
@@ -248,7 +249,6 @@ debugger;
       app.removeLoading();
     }
   };
-
 
   app.showLoading = function() {
       app.spinner.removeAttribute('hidden');
