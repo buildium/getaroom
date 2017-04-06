@@ -77,6 +77,7 @@
 
   document.getElementById('apply-filters-button').addEventListener('click', function() {
      app.applyFilters();
+     app.toggleFilterDropdown();
   });
 
   /*****************************************************************************
