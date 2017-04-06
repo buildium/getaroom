@@ -49,6 +49,12 @@
     <button id="butRefresh" class="headerButton" aria-label="Refresh"></button>
     <button id="butFilter" class="headerButton" aria-label="Filter"></button>
     <div class="filter-list" style="display: none;">
+        <p>Time Duration</p>
+        <div class="time-filter">
+            <input type="range" class="time-filter-range" min="15" max="120" step="15" value="30" oninput="showTimeRangeVal(this.value)" onchange="showTimeRangeVal(this.value)"/>
+            <div><span class="time-range-value">30</span> mins</div>
+        </div>
+        <hr class="filter-divider"></hr>
         <div>
             <ul class="type-filters">
                 <p>Types</p>

@@ -130,7 +130,7 @@
            calendarId: 'primary',
            resource: event,
        }).then(function(response) {
-           card.querySelector('.user-message').innerHTML = '<span class=\'success\'>Successfully booked room! Click <a target=_blank href=\'' + response.result.htmlLink + '\'>here</a> to view in calendar</span>';
+           card.querySelector('.user-message').innerHTML = '<span class=\'success\'><a target=_blank href=\'' + response.result.htmlLink + '\'>View in calendar</a></span>';
            card.querySelector('.reserve-room-button').classList.add('reserved');
        });
    };
@@ -410,4 +410,8 @@ function getRoomType(type) {
     }
 
     return 'default';
+}
+
+var showTimeRangeVal = function(timeVal) {
+    document.querySelector('.time-range-value').textContent = timeVal;
 }
