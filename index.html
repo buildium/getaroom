@@ -37,21 +37,12 @@
 
   <header class="header">
     <h1 class="header__title">Get a room</h1>
-    <div class="dropdown">
-      <button id="trigger-dropdown" class="headerButton dropbtn" aria-label="time-dropdown"></button>
-        <div id="myDropdown" class="dropdown-content">
-          <a href="" id="30-minute-button">30 Mins</a>
-          <a href="" id="hour-button">60 Mins</a>
-          <a href="" id="90-minute-button">90 Mins</a>
-          <a href="" id="2-hour-button">120 Mins</a>
-        </div>
-    </div>
     <button id="butRefresh" class="headerButton" aria-label="Refresh"></button>
     <button id="butFilter" class="headerButton" aria-label="Filter"></button>
     <div class="filter-list" style="display: none;">
         <p>Time Duration</p>
         <div class="time-filter">
-            <input type="range" class="time-filter-range" min="15" max="120" step="15" value="30" oninput="showTimeRangeVal(this.value)" onchange="showTimeRangeVal(this.value)"/>
+            <input id="time-value" type="range" class="time-filter-range" min="15" max="120" step="15" value="30" oninput="showTimeRangeVal(this.value)" onchange="showTimeRangeVal(this.value)"/>
             <div><span class="time-range-value">30</span> mins</div>
         </div>
         <hr class="filter-divider"></hr>

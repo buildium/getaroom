@@ -76,29 +76,10 @@
      }
     });
 
-  document.getElementById('30-minute-button').addEventListener('click', function() {
-      app.refreshResources(30);
-    });
-
-  document.getElementById('hour-button').addEventListener('click', function() {
-    app.refreshResources(60);
-  });
-
-  document.getElementById('90-minute-button').addEventListener('click', function() {
-    app.refreshResources(90);
-    });
-
-  document.getElementById('2-hour-button').addEventListener('click', function() {
-    app.refreshResources(120);
-  });
-
-  document.getElementById('trigger-dropdown').addEventListener('click', function() {
-    document.getElementById('myDropdown').classList.toggle('show');
-  });
-
-
-
-
+    document.getElementById('apply-filters-button').addEventListener('click', function() {
+      var minutes = parseInt(document.getElementById('time-value').value);
+      app.refreshResources(minutes);
+    })
   /*****************************************************************************
    *
    * Methods to update/refresh the UI
