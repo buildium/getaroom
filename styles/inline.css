@@ -388,6 +388,11 @@ body {
   font-size: 1.1em;
 }
 
+.room .meeting-time {
+    color: #FBB03B;
+    font-size: 1em;
+}
+
 .room .description {
     font-size: 1em;
 }

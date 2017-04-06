@@ -79,6 +79,7 @@
      app.applyFilters();
   });
 
+
   /*****************************************************************************
    *
    * Methods to update/refresh the UI
@@ -112,6 +113,9 @@
        }).then(function(response) {
            card.querySelector('.user-message').innerHTML = '<span class=\'success\'><a target=_blank href=\'' + response.result.htmlLink + '\'>View in calendar</a></span>';
            card.querySelector('.reserve-room-button').classList.add('reserved');
+           var startTime = formatDateTime(response.result.start);
+           var endTime = formatDateTime(response.result.end);
+           card.querySelector('.meeting-time').textContent =  startTime + ' - ' + endTime;
        });
    };
 
@@ -159,6 +163,8 @@
                            if (attendee.email === resource.resourceEmail) {
                                resource.isBooked = true;
                                resource.eventLink = item.htmlLink;
+                               resource.start = item.start;
+                               resource.end = item.end;
                                currentResources.push(resource);
                            }
                        });
@@ -242,6 +248,9 @@
       if (resource.isBooked) {
           var calendarLink = resource.eventLink ? resource.eventLink : 'calendar.google.com';
           actionButton.innerHTML = '<a class=\'gcalendar-link\' target=\'_blank\' href=\'' + calendarLink +'\'><img src=\'../images/gcalendar.png\'></a>';
+           var startTime = formatDateTime(resource.start);
+           var endTime = formatDateTime(resource.end);
+           card.querySelector('.meeting-time').textContent =  startTime + ' - ' + endTime;
       } else {
             card.querySelector(".reserve-room-button").addEventListener('click', function() {
             app.bookRoom(resourceEmail, card);
@@ -257,6 +266,7 @@
       app.removeLoading();
     }
   };
+
 
   app.showLoading = function() {
       app.spinner.removeAttribute('hidden');
@@ -351,6 +361,15 @@
    }
 
 
+  var formatDateTime = function(dateAndTimezone) {
+    //weekday: "short", year: "numeric", month: "short",  
+      //day: "numeric", 
+    var options = {  
+      hour: "2-digit", minute: "2-digit"  
+    };  
+    var dateTime = new Date(dateAndTimezone.dateTime); 
+    return dateTime.toLocaleTimeString('en-us', options);
+  }
 
   /************************************************************************
    *
