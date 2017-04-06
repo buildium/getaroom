@@ -237,7 +237,7 @@
           if (resources && resources.length > 0) {
            app.updateResourceCards(resources); //set user's resources if any
           }
-          
+
            model.getAvailableResources(now, halfHourFromNow.toISOString(), app.updateResourceCards);//set available resources
        })
    }
@@ -386,4 +386,8 @@ function getRoomType(type) {
     }
 
     return 'default';
+}
+
+var showTimeRangeVal = function(timeVal) {
+    document.querySelector('.time-range-value').textContent = timeVal;
 }
