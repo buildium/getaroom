@@ -5,6 +5,7 @@
 rm -rf build
 mkdir build
 cp -r images build/images
+cp -r lib build/lib
 cp -r scripts build/scripts
 cp -r styles build/styles
 cp -r config.js build/config.js

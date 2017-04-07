@@ -19,7 +19,6 @@ var filesToCache = [
   '/index.html',
   '/config.js?version=REPLACE_VERSION',
   '/scripts/model.js?version=REPLACE_VERSION',
-  '/scripts/toast.js?version=REPLACE_VERSION',
   '/scripts/app.js?version=REPLACE_VERSION',
   '/styles/inline.css?version=REPLACE_VERSION',
   '/images/ic_add_white_24px.svg',
